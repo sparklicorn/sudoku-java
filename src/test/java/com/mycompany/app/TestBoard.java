@@ -2,11 +2,12 @@ package com.mycompany.app;
 
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.junit.Test;
 
-import com.mycompany.app.sudoku.Board;;
+import com.mycompany.app.sudoku.Board;
 
 	public class TestBoard {
 
@@ -283,6 +284,39 @@ import com.mycompany.app.sudoku.Board;;
 	//getCandidates
 	@Test
 	public void testGetCandidates() {
+
+		Board b = new Board();
+		ArrayList<Integer> candidates = new ArrayList<>(9);
+		
+		ArrayList<Integer> NO_CANDIDATES = new ArrayList<>();
+		ArrayList<Integer> ALL_CANDIDATES = new ArrayList<>(9);
+		for (int i = 1; i <= 9; i++) {
+			ALL_CANDIDATES.add(i);
+		}
+
+		//Empty board - Every position should have a full candidates list.
+		for (int i = 0; i < Board.NUM_CELLS; i++) {
+			candidates.clear();
+			b.getCandidates(i, candidates);
+			assertEquals(ALL_CANDIDATES, candidates);
+		}
+
+		//Full configurations - Every position should have an empty candidates list.
+		//Check with all the valid boards.
+		for (String bStr : VALID_CONFIGS) {
+			b = new Board(bStr);
+			for (int i = 0; i < Board.NUM_CELLS; i++) {
+				candidates.clear();
+				b.getCandidates(i, candidates);
+				ArrayList<Integer> expected = new ArrayList<>();
+				expected.add(b.getValueAt(i));
+				assertEquals(expected, candidates);
+			}
+		}
+
+		//TODO
+		//Test some partially filled out boards.
+
 		fail();
 	}
 
@@ -356,10 +390,6 @@ import com.mycompany.app.sudoku.Board;;
 		Board b = new Board();
 		assertEquals(true, b.isValid());
 
-		//Test each step of this puzzle I solved.
-		//TODO
-		fail();
-
 		//Test valid Sudoku configurations.
 		for (String c : VALID_CONFIGS) {
 			b = new Board(c);
@@ -371,6 +401,10 @@ import com.mycompany.app.sudoku.Board;;
 			b = new Board(c);
 			assertEquals(false, b.isValid());
 		}
+
+		//Test each step of this puzzle I solved.
+		//TODO
+		fail();
 
 	}
 

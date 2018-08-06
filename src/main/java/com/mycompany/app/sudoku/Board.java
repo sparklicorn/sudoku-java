@@ -29,8 +29,8 @@ import java.util.List;
  */
 public class Board implements ISudokuBoard, Serializable {
 
-	private static final long serialVersionUID = -346038865775671136L;
 	//TODO - Regenerate this value upon modifying class.
+	private static final long serialVersionUID = -6346231818157404798L;
 
 	/* ****************************************************
 	 * 			NOTES
@@ -98,6 +98,9 @@ public class Board implements ISudokuBoard, Serializable {
 	/** Creates a Board that is empty.*/
 	public Board() {
 		board = new int[NUM_CELLS];
+		for (int i = 0; i < NUM_CELLS; i++) {
+			board[i] = ALL;
+		}
 	}
 	
 	/**
@@ -311,10 +314,15 @@ public class Board implements ISudokuBoard, Serializable {
 
 	@Override
 	public List<Integer> getCandidates(int index, List<Integer> list) {
-		int v = Integer.bitCount(board[index]);
-		for (int c = 1; c <= 9; c++) {
-			if ((v & (1 << (c - 1))) > 0) {
-				list.add(c);
+		int value = board[index];
+		int decoded = decode(value);
+		if (decoded > 0) {
+			list.add(decoded);
+		} else {
+			for (int shift = 0; shift < 9; shift++) {
+				if ((value & (1 << shift)) > 0) {
+					list.add(shift + 1);
+				}
 			}
 		}
 		return list;
@@ -343,6 +351,14 @@ public class Board implements ISudokuBoard, Serializable {
 	 * @return True if the board is valid; otherwise false.
 	 */
 	public boolean isValid() {
+
+		//Check for positions with no candidates.
+		/*for (int i = 0; i < NUM_CELLS; i++) {
+			int v = board[i];
+			if (v == 0)
+				return false;
+		}*/
+
 		for (int x = 0; x < 9; x++) {
 			if (!isRowValid(x)) {
 				return false;
