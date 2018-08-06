@@ -119,39 +119,6 @@ public class Solver {
 		return true;
 	}
 
-	private static boolean searchForSolution2(Board board, SolutionFoundPolicy p) {
-		//This will be reused and repopulated by board.getCandidates(list)
-		//	to reduce overhead.
-		List<Integer> candidates = new ArrayList<>(9);
-		Queue<Board> q = new ArrayDeque<>();
-		q.offer(new Board(board));
-
-		while (!q.isEmpty()) {
-			Board b = q.poll();
-
-			boolean isValid = b.isValid();
-			boolean isFull = b.isFull();
-
-			if (!isFull)
-				if (reduce(b))
-					isFull = b.isFull();
-
-			if (isValid && isFull) {
-				if (!p.execute(b)) {
-					return false;
-				}
-
-			} else if (isValid) {
-				int index = pickEmptyCell(b);
-				if (index > 0) {
-					putCellCandidatesInQueue(b, index, q, candidates);
-				}
-			}
-		}
-
-		return true;
-	}
-
 	/**
 	 * Searches for the index of the empty cell in board which has the fewest
 	 * number of candidates. Starts at the top of the board.
