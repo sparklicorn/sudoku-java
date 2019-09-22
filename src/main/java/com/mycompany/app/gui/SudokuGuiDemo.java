@@ -18,15 +18,26 @@ import com.mycompany.app.util.FileUtil;
 
 public class SudokuGuiDemo {
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) {
 		
-		String str = "59..1...218......5....6.4.97.......3.48.29.6...5.7..8......32..93.14.......2.7..8";
+		//String str = "59..1...218......5....6.4.97.......3.48.29.6...5.7..8......32..93.14.......2.7..8";
 		
-		URL url = new URL("https://sudonicornoku.herokuapp.com/api/getrandom?clues=27");
-		HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
-		String content = FileUtil.getContent(con).trim();
+		int numClues = 27;
+		if (args != null && args.length >= 1) {
+			numClues = Integer.parseInt(args[0]);
+		}
+
+		URL url;
+		String content = "59..1...218......5....6.4.97.......3.48.29.6...5.7..8......32..93.14.......2.7..8";
+		try {
+			url = new URL("https://sudonicornoku.herokuapp.com/api/getrandom?clues=" + numClues);
+			HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
+			content = FileUtil.getContent(con).trim();
+			System.out.println("content: " + content);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
-		System.out.println("content: " + content);
 		//System.out.println(content.length());
 		
 		//{"id":1,"puzzle":".1..54.2..6.1...5..9..6.1.........92....13...93..285..2.35..87...82.1..5....37..6"}

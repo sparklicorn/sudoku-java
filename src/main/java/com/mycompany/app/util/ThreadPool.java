@@ -132,7 +132,6 @@ public class ThreadPool {
 				try {
 					Thread.sleep(100L);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -159,7 +158,6 @@ public class ThreadPool {
 				try {
 					Thread.sleep(100L);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}

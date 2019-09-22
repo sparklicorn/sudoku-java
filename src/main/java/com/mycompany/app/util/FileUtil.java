@@ -19,24 +19,25 @@ import java.util.Scanner;
  */
 public class FileUtil {
 	
-	//get all files (not directories) in dir with name filter (regex)
-	//maybe optionally recursive TODO
 	/**
 	 * Returns a List containing the absolute paths of files found matching
 	 * the given criteria in the given directory.
-	 * <br/>Does not recurse through sub-directories.
+	 * <br/>File names are compared against filterRegex as lowercase.
 	 * @param dir - Directory path to search in.
 	 * @param filterRegex - Regular expression to match file names with.
+	 * @param recurse - Whether to search directories recursively.
 	 * @return A List of file paths, or <code>null</code> if the directory name
 	 * provided does not exist or is not a real directory.
 	 */
-	public static List<String> findFiles(String dir, String filterRegex) {
+	public static List<String> findFiles(String dir, String filterRegex, boolean recurse) {
 		ArrayList<String> result = null;
 		File fDir = new File(dir);
 		if (fDir.exists() && fDir.isDirectory()) {
 			result = new ArrayList<>();
 			for (File f : fDir.listFiles()) {
-				if (f.getName().toLowerCase().matches(filterRegex)) {
+				if (f.isDirectory() && recurse) {
+					result.addAll(findFiles(f.getAbsolutePath(), filterRegex, recurse));
+				} else if (f.getName().toLowerCase().matches(filterRegex)) {
 					result.add(f.getAbsolutePath());
 				}
 			}

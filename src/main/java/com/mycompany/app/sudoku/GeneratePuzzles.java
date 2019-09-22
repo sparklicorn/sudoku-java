@@ -9,10 +9,10 @@ public class GeneratePuzzles {
 
         if (args != null) {
             if (args.length >= 1) {
-                numClues = Integer.parseInt(args[0]);
+                numPuzzles = Integer.parseInt(args[0]);
             }
             if (args.length >= 2) {
-                numPuzzles = Integer.parseInt(args[1]);
+                numClues = Integer.parseInt(args[1]);
             }
         }
         

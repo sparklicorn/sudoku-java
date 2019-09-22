@@ -155,15 +155,7 @@ public class SudokuBoard extends JPanel implements ComponentListener {
 			}
 		}
 		@Override public void keyReleased(KeyEvent e) {}
-
-		@Override
-		public void mouseWheelMoved(MouseWheelEvent e) {
-			//int delta = e.getWheelRotation();
-			
-			//TODO
-			//add delta to digit mod 9 + 1
-			
-		}
+		@Override public void mouseWheelMoved(MouseWheelEvent e) {}
 	}
 	
 	public SudokuBoard(Board board) {
@@ -256,20 +248,6 @@ public class SudokuBoard extends JPanel implements ComponentListener {
 		}
 		
 	}
-	
-	/**
-	 * Determines the index of the sudoku board cell (0 through 80) on this
-	 * panel that exists at the given coordinates. Used to determine which
-	 * cell is drawn at the coordinates
-	 * @param x
-	 * @param y
-	 * @return
-	 *
-	private int getcellIndexByPosition(int x, int y) {
-		//TODO
-		return -1;
-	}
-	*/
 	
 	@Override protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
