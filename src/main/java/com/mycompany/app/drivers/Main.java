@@ -2,7 +2,6 @@ package com.mycompany.app.drivers;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -38,8 +37,7 @@ import com.mycompany.app.util.ThreadPool;
  * "puzzles [integer n (1)] [integer clues (27)]" Generate 'n' number of Sudoku
  * puzzles with 'clues' number of clues.
  *
- * "benchy [path to puzzles file]" Runs puzzle solver benchmarking using the
- * puzzles in the given file.
+ * "benchy" Runs puzzle solver benchmarking.
  */
 public class Main {
 
@@ -157,10 +155,6 @@ public class Main {
                         TimeUnit.NANOSECONDS.toMillis(end - start));
                 break;
             case "benchy":
-                // if (args.length <= 1) {
-                //     System.out.println("Please provide a puzzle file path");
-                //     return;
-                // }
                 benchy();
                 break;
             default:
@@ -169,7 +163,6 @@ public class Main {
     }
 
     private static void benchy() {
-        // File file = new File(filepath);
         List<Board> boards = GeneratedPuzzles.convertStringsToBoards(
             GeneratedPuzzles.PUZZLES_24_1000
         );
@@ -190,20 +183,25 @@ public class Main {
         }
 
         final long startRealTime = System.currentTimeMillis();
+        final int numThreads = Runtime.getRuntime().availableProcessors();
         ThreadPool.doBatch(
             timedBoardSolvers,
-            Runtime.getRuntime().availableProcessors(),
+            numThreads,
             () -> {
                 long totalCpuTime = 0L;
                 for (long time : solveTimes) {
                     totalCpuTime += time;
                 }
-                System.out.println();
-                System.out.printf("Real time to solve all puzzles: %d ms.%n", (System.currentTimeMillis() - startRealTime));
                 System.out.printf(
-                    "Total time to solve all puzzles: %s.%n",
-                    formatDuration(TimeUnit.NANOSECONDS.toMillis(totalCpuTime))
+                    "%nReal time to solve all puzzles: %s.%n",
+                    formatDuration(System.currentTimeMillis() - startRealTime)
                 );
+                System.out.printf(
+                    "Total cpu time to solve all puzzles: %s [%s / thread].%n",
+                    formatDuration(TimeUnit.NANOSECONDS.toMillis(totalCpuTime)),
+                    formatDuration(TimeUnit.NANOSECONDS.toMillis(totalCpuTime / numThreads))
+                    );
+                System.out.printf("Using %d threads.%n", numThreads);
             }
         );
     }
@@ -227,23 +225,5 @@ public class Main {
         runnable.run();
         long end = bean.getCurrentThreadCpuTime();
         return end - start;
-    }
-
-    private static List<Board> readBoardsFromFile(File file, List<Board> boards) {
-        try (Scanner scanner = new Scanner(file)) {
-            while (scanner.hasNextLine()) {
-                String line = scanner.nextLine().replaceAll("[^0-9\\.]", "");
-                Board b = new Board(line);
-                if (b.getNumClues() >= 20) {
-                    // System.out.println("Read: " + b.getSimplifiedString());
-                    boards.add(b);
-                }
-            }
-            scanner.close();
-        } catch (FileNotFoundException e) {
-            System.err.println("Puzzle file could not be opened.");
-        }
-
-        return boards;
     }
 }
