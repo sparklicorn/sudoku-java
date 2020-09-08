@@ -187,24 +187,24 @@ public class Generator {
         int tp = 0;
         int pops = 0;
 
-        //System.out.println("Starting with " + config.getSimplifiedString());
+        // System.out.println("Starting with " + config.getSimplifiedString());
 
         while (!stack.isEmpty() && pops < maxPops) {
             Node n = stack.peek();
             n.visit();
             //visited.add(n);
 
-            //System.out.println("Peek > (" + n.b.getNumClues() + ") " + n.b.getSimplifiedString());
+            // System.out.println("Peek > (" + n.b.getNumClues() + ") " + n.b.getSimplifiedString());
 
             //if more than one solution...
             if (!Solver.solvesUniquely(n.b, config)) {
-                //System.out.println("Doesn't solve uniquely.");
+                // System.out.println("Doesn't solve uniquely.");
                 stack.pop();
                 n.kill();
                 tp++;
-                if (++pops == 10000) {
-                    System.out.print('.');
-                    if (tp > 0 && tp % 800000 == 0)
+                if (++pops == 100) {
+                    // System.out.printf("Too many pops (%d)... trying again.%n", tp);
+                    if (tp > 0 && tp % 8000 == 0)
                         System.out.println();
                     stack.clear();
                     stack.push(root);
@@ -212,7 +212,7 @@ public class Generator {
                 }
                 continue;
             } else if (n.b.getNumClues() <= numClues) { //if target found
-                //System.out.println("Target found!");
+                // System.out.println("Target found!");
                 break;
             }
 
@@ -224,13 +224,13 @@ public class Generator {
                 stack.push(next);
                 //visited.add(next);
             } else {
-                //System.out.println("Out of neighbors.");
+                // System.out.println("Out of neighbors.");
                 stack.pop();
 
                 tp++;
-                if (++pops == 10000) {
-                    System.out.print('.');
-                    if (tp > 0 && tp % 800000 == 0)
+                if (++pops == 100) {
+                    // System.out.printf("Too many pops (%d)... trying again.%n", tp);
+                    if (tp > 0 && tp % 8000 == 0)
                         System.out.println();
                     stack.clear();
                     stack.push(root);
@@ -239,8 +239,8 @@ public class Generator {
             }
         }
 
-        //System.out.println();
-        //System.out.println("Pops: " + tp);
+        // System.out.println();
+        // System.out.println("Pops: " + tp);
 
         List<Board> result = new ArrayList<>();
         if (!stack.isEmpty()) {
@@ -290,7 +290,7 @@ public class Generator {
 			    }
 			}
 		}
-	}
+    }
 
     public static Board generateConfig() {
 		//Start with a blank board and generate some of the regions.

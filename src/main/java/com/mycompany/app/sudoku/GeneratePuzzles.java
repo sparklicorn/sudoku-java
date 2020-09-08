@@ -1,11 +1,13 @@
 package com.mycompany.app.sudoku;
 
+import com.mycompany.app.util.ThreadPool;
+
 public class GeneratePuzzles {
-    
+
     public static void main(String[] args) {
 
         int numClues = 27;
-        int numPuzzles = 1;
+        int numPuzzles = 10;
 
         if (args != null) {
             if (args.length >= 1) {
@@ -15,14 +17,14 @@ public class GeneratePuzzles {
                 numClues = Integer.parseInt(args[1]);
             }
         }
-        
-        for (int i = 0; i < numPuzzles; i++) {
-            for (Board b : Generator.generatePuzzles(numClues)) {
-                System.out.println(b.getSimplifiedString());
-            }
-            System.out.println();
-        }
-        
-    }
 
+        final int clues = numClues;
+
+        int numThreads = Runtime.getRuntime().availableProcessors();
+        Runnable work = () -> {
+            System.out.println(Generator.generatePuzzle(clues).getSimplifiedString());
+        };
+
+        ThreadPool.repeatWork(work, numPuzzles, numThreads, null);
+    }
 }

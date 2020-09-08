@@ -77,7 +77,9 @@ public class Solver {
 	 */
 	public static void findAllSolutions(Board board, Callback<Board> callback) {
 		searchForSolution3(board, (b) -> {
-			callback.call(b);
+			if (callback != null) {
+				callback.call(b);
+			}
 			return true;
 		});
 	}
