@@ -11,6 +11,8 @@ import java.io.PrintWriter;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
@@ -20,6 +22,7 @@ import com.mycompany.app.sudoku.GenerateConfigs;
 import com.mycompany.app.sudoku.GeneratePuzzles;
 import com.mycompany.app.sudoku.Generator;
 import com.mycompany.app.sudoku.Solver;
+import com.mycompany.app.util.ThreadPool;
 
 /**
  * Main driver for the Sudoku project. Commands/Options:
@@ -34,6 +37,8 @@ import com.mycompany.app.sudoku.Solver;
  * "puzzles [integer n (1)] [integer clues (27)]" Generate 'n' number of Sudoku
  * puzzles with 'clues' number of clues.
  *
+ * "benchy [path to puzzles file]" Runs puzzle solver benchmarking using the
+ * puzzles in the given file.
  */
 public class Main {
 
@@ -114,7 +119,7 @@ public class Main {
                 start = bean.getCurrentThreadCpuTime();
                 File serialFile = new File("test-serial.txt");
                 FileOutputStream f = new FileOutputStream(serialFile);
-			    ObjectOutputStream o = new ObjectOutputStream(f);
+                ObjectOutputStream o = new ObjectOutputStream(f);
                 for (Board b : configs) {
                     o.writeObject(b);
                 }
@@ -150,8 +155,91 @@ public class Main {
                 System.out.printf("Deserialized %d configs in %d ms.%n", count,
                         TimeUnit.NANOSECONDS.toMillis(end - start));
                 break;
+            case "benchy":
+                if (args.length <= 1) {
+                    System.out.println("Please provide a puzzle file path");
+                    return;
+                }
+                benchy(args[1]);
+                break;
             default:
                 System.out.println("Sudoku: Command not recognized.");
         }
+    }
+
+    private static void benchy(String filepath) {
+        File file = new File(filepath);
+        List<Board> boards = readBoardsFromFile(file, new ArrayList<>());
+        System.out.printf("%d boards loaded.%n", boards.size());
+
+        List<Runnable> timedBoardSolvers = new ArrayList<>();
+        List<Long> solveTimes = Collections.synchronizedList(new ArrayList<>());
+        for (Board b : boards) {
+            timedBoardSolvers.add(() -> {
+                long cpuTime = timeCpuExecution(() -> {
+                    Board solution = Solver.solve(b);
+                    // System.out.printf("%s  =>  %s%n", b.getSimplifiedString(), solution.getSimplifiedString());
+                });
+                // System.out.printf("Puzzle solved in %d ms.%n", TimeUnit.NANOSECONDS.toMillis(cpuTime));
+                solveTimes.add(cpuTime);
+            });
+        }
+
+        final long startRealTime = System.currentTimeMillis();
+        ThreadPool.doBatch(
+            timedBoardSolvers,
+            Runtime.getRuntime().availableProcessors(),
+            () -> {
+                long totalCpuTime = 0L;
+                for (long time : solveTimes) {
+                    totalCpuTime += time;
+                }
+                System.out.println();
+                System.out.printf("Real time to solve all puzzles: %d ms.%n", (System.currentTimeMillis() - startRealTime));
+                System.out.printf(
+                    "Total time to solve all puzzles: %s.%n",
+                    formatDuration(TimeUnit.NANOSECONDS.toMillis(totalCpuTime))
+                );
+            }
+        );
+    }
+
+    private static String formatDuration(long milli) {
+        long mins = milli / 1000L / 60L;
+        long secs = (milli / 1000L) % 60L;
+        milli %= 1000L;
+
+        String secString = String.format("%d.%d s", secs, milli);
+        if (mins > 0L) {
+            return String.format("%d m   %s", mins, secString);
+        }
+
+        return secString;
+    }
+
+    private static long timeCpuExecution(Runnable runnable) {
+        ThreadMXBean bean = ManagementFactory.getThreadMXBean();
+        long start = bean.getCurrentThreadCpuTime();
+        runnable.run();
+        long end = bean.getCurrentThreadCpuTime();
+        return end - start;
+    }
+
+    private static List<Board> readBoardsFromFile(File file, List<Board> boards) {
+        try (Scanner scanner = new Scanner(file)) {
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine().replaceAll("[^0-9\\.]", "");
+                Board b = new Board(line);
+                if (b.getNumClues() >= 20) {
+                    // System.out.println("Read: " + b.getSimplifiedString());
+                    boards.add(b);
+                }
+            }
+            scanner.close();
+        } catch (FileNotFoundException e) {
+            System.err.println("Puzzle file could not be opened.");
+        }
+
+        return boards;
     }
 }
