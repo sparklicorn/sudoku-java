@@ -22,6 +22,7 @@ import com.mycompany.app.sudoku.GenerateConfigs;
 import com.mycompany.app.sudoku.GeneratePuzzles;
 import com.mycompany.app.sudoku.Generator;
 import com.mycompany.app.sudoku.Solver;
+import com.mycompany.app.sudoku.puzzles.GeneratedPuzzles;
 import com.mycompany.app.util.ThreadPool;
 
 /**
@@ -156,20 +157,23 @@ public class Main {
                         TimeUnit.NANOSECONDS.toMillis(end - start));
                 break;
             case "benchy":
-                if (args.length <= 1) {
-                    System.out.println("Please provide a puzzle file path");
-                    return;
-                }
-                benchy(args[1]);
+                // if (args.length <= 1) {
+                //     System.out.println("Please provide a puzzle file path");
+                //     return;
+                // }
+                benchy();
                 break;
             default:
                 System.out.println("Sudoku: Command not recognized.");
         }
     }
 
-    private static void benchy(String filepath) {
-        File file = new File(filepath);
-        List<Board> boards = readBoardsFromFile(file, new ArrayList<>());
+    private static void benchy() {
+        // File file = new File(filepath);
+        List<Board> boards = GeneratedPuzzles.convertStringsToBoards(
+            GeneratedPuzzles.PUZZLES_24_1000
+        );
+
         System.out.printf("%d boards loaded.%n", boards.size());
 
         List<Runnable> timedBoardSolvers = new ArrayList<>();
