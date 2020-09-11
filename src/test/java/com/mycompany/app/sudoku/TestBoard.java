@@ -1,15 +1,14 @@
-package com.mycompany.app;
+package com.mycompany.app.sudoku;
 
 import static org.junit.Assert.*;
 
-import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.junit.Test;
 
-import com.mycompany.app.sudoku.Board;
+import com.mycompany.app.sudoku.puzzles.GeneratedPuzzles;
 
-	public class TestBoard {
+public class TestBoard {
 
 	private static final String[] VALID_CONFIGS = new String[] {
 		"793458261218963754456271893634712589185649327927385146541836972872194635369527418",
@@ -67,8 +66,6 @@ import com.mycompany.app.sudoku.Board;
 		"819784564975946128118153927541734849397281652486225714635369336967734286158327295",
 	};
 
-
-	//getNumEmptySpaces
 	@Test
 	public void testGetNumEmptySpaces() {
 
@@ -148,23 +145,23 @@ import com.mycompany.app.sudoku.Board;
 
 		b = new Board("59..1...218......5....6.4.97.......3.48.29.6...5.7..8......32..93.14.......2.7..8");
 		assertArrayEquals(new int[] {
-				5, 9, 0, 0, 1, 0, 0, 0, 2, 1, 8, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 6, 0, 4, 0, 9, 7,
-				0, 0, 0, 0, 0, 0, 0, 3, 0, 4, 8, 0, 2, 9, 0, 6, 0, 0, 0, 5, 0, 7, 0, 0, 8, 0, 0, 0,
-				0, 0, 0, 3, 2, 0, 0, 9, 3, 0, 1, 4, 0, 0, 0, 0, 0, 0, 0, 2, 0, 7, 0, 0, 8
+			5, 9, 0, 0, 1, 0, 0, 0, 2, 1, 8, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 6, 0, 4, 0, 9, 7,
+			0, 0, 0, 0, 0, 0, 0, 3, 0, 4, 8, 0, 2, 9, 0, 6, 0, 0, 0, 5, 0, 7, 0, 0, 8, 0, 0, 0,
+			0, 0, 0, 3, 2, 0, 0, 9, 3, 0, 1, 4, 0, 0, 0, 0, 0, 0, 0, 2, 0, 7, 0, 0, 8
 		}, b.getValues(new int[Board.NUM_CELLS]));
 
 		b = new Board("11111111111111111111111111111111111111111111111111111111111111111111111111111111.");
 		assertArrayEquals(new int[] {
-				1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-				1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-				1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0
+			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0
 		}, b.getValues(new int[Board.NUM_CELLS]));
 
 		b = new Board(".....1111111111111111111111111111111111111111111111111111111111111111111111111111");
 		assertArrayEquals(new int[] {
-				0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-				1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-				1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
+			0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
 		}, b.getValues(new int[Board.NUM_CELLS]));
 
 		b = new Board(".................................................................................");
@@ -281,46 +278,6 @@ import com.mycompany.app.sudoku.Board;
 
 	}
 
-	//getCandidates
-	@Test
-	public void testGetCandidates() {
-
-		Board b = new Board();
-		ArrayList<Integer> candidates = new ArrayList<>(9);
-
-		ArrayList<Integer> NO_CANDIDATES = new ArrayList<>();
-		ArrayList<Integer> ALL_CANDIDATES = new ArrayList<>(9);
-		for (int i = 1; i <= 9; i++) {
-			ALL_CANDIDATES.add(i);
-		}
-
-		//Empty board - Every position should have a full candidates list.
-		for (int i = 0; i < Board.NUM_CELLS; i++) {
-			candidates.clear();
-			b.getCandidates(i, candidates);
-			assertEquals(ALL_CANDIDATES, candidates);
-		}
-
-		//Full configurations - Every position should have an empty candidates list.
-		//Check with all the valid boards.
-		for (String bStr : VALID_CONFIGS) {
-			b = new Board(bStr);
-			for (int i = 0; i < Board.NUM_CELLS; i++) {
-				candidates.clear();
-				b.getCandidates(i, candidates);
-				ArrayList<Integer> expected = new ArrayList<>();
-				expected.add(b.getValueAt(i));
-				assertEquals(expected, candidates);
-			}
-		}
-
-		//TODO
-		//Test some partially filled out boards.
-
-		fail();
-	}
-
-	//copy
 	@Test
 	public void testCopy() {
 
@@ -379,41 +336,36 @@ import com.mycompany.app.sudoku.Board;
 			assertEquals(true, b.getValueAt(i) == b2.getValueAt(i));
 			assertEquals(true, b.getMaskAt(i) == b2.getMaskAt(i));
 		}
-
 	}
 
-	//isValid
 	@Test
 	public void testIsValid() {
-
-		//Test empty board (valid).
+		// Empty board (valid)
 		Board b = new Board();
-		assertEquals(true, b.isValid());
+		assertTrue(b.isValid());
 
-		//Test valid Sudoku configurations.
+		// Valid configurations
 		for (String c : VALID_CONFIGS) {
 			b = new Board(c);
-			assertEquals(true, b.isValid());
+			assertTrue(b.isValid());
 		}
 
-		//Test invalid configurations.
+		// Invalid configurations
 		for (String c : INVALID_CONFIGS) {
 			b = new Board(c);
-			assertEquals(false, b.isValid());
+			assertFalse(b.isValid());
 		}
 
-		//Test each step of this puzzle I solved.
-		//TODO
-		fail();
-
+		// Pre-generated puzzles (all valid)
+		for (int i = 0; i < Math.min(100, GeneratedPuzzles.PUZZLES_24_1000.length); i++) {
+			b = new Board(GeneratedPuzzles.PUZZLES_24_1000[i]);
+			assertTrue(b.isValid());
+		}
 	}
 
-	//isRowValid
 	@Test
 	public void testIsRowValid() {
-
-		//Valid = no duplicate values.
-		//Row does not need to be complete.
+		//Validity is determined by whether there are duplicate values.
 
 		//Test empty rows (valid).
 		Board b = new Board();
@@ -514,9 +466,6 @@ import com.mycompany.app.sudoku.Board;
 	//isColValid
 	@Test
 	public void testIsColValid() {
-		//Valid = no duplicate values.
-		//Column does not need to be complete.
-
 		//Test empty rows (valid).
 		Board b = new Board();
 		for (int c = 0; c < 9; c++) {
@@ -612,9 +561,6 @@ import com.mycompany.app.sudoku.Board;
 	//isRegionValid
 	@Test
 	public void testIsRegionValid() {
-		//Valid = no duplicate values.
-		//Region does not need to be complete.
-
 		//Test empty regions (valid).
 		Board b = new Board();
 		for (int c = 0; c < 9; c++) {
@@ -627,7 +573,7 @@ import com.mycompany.app.sudoku.Board;
 		for (int i = 0; i < 9; i++) {
 			int digit = getValueAt(gr*27 + gc*3 + (i/3)*9 + (i%3));
 		}
-		 ********************************/
+		********************************/
 
 		//Test almost empty regions (valid).
 		//Set first value in each region to 1.
