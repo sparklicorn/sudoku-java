@@ -155,14 +155,19 @@ public class Main {
                         TimeUnit.NANOSECONDS.toMillis(end - start));
                 break;
             case "benchy":
-                benchy();
+                boolean verbose = false;
+                if (args.length > 1) {
+                    verbose = args[1].equals("true");
+                }
+
+                benchy(verbose);
                 break;
             default:
                 System.out.println("Sudoku: Command not recognized.");
         }
     }
 
-    private static void benchy() {
+    private static void benchy(boolean verbose) {
         List<Board> boards = GeneratedPuzzles.convertStringsToBoards(
             GeneratedPuzzles.PUZZLES_24_1000
         );
@@ -175,7 +180,9 @@ public class Main {
             timedBoardSolvers.add(() -> {
                 long cpuTime = timeCpuExecution(() -> {
                     Board solution = Solver.solve(b);
-                    // System.out.printf("%s  =>  %s%n", b.getSimplifiedString(), solution.getSimplifiedString());
+                    if (verbose) {
+                        System.out.printf("%s  =>  %s%n", b.getSimplifiedString(), solution.getSimplifiedString());
+                    }
                 });
                 // System.out.printf("Puzzle solved in %d ms.%n", TimeUnit.NANOSECONDS.toMillis(cpuTime));
                 solveTimes.add(cpuTime);
