@@ -1,4 +1,4 @@
-package com.mycompany.app.util;
+package com.sparklicorn.sudoku.util;
 
 import java.util.AbstractQueue;
 import java.util.ArrayList;
@@ -19,15 +19,15 @@ public class PriorityQueue<T> extends AbstractQueue<T> {
 	private int getLeft(int i) {
 		return (2 * i) + 1;
 	}
-	
+
 	private int getRight(int i) {
 		return 2 * (i + 1);
 	}
-	
+
 	private int getParent(int i) {
 		return (i - 1) / 2;
 	}
-	
+
 	private boolean hasParent(int i) {
 		return i > 0;
 	}
@@ -35,7 +35,7 @@ public class PriorityQueue<T> extends AbstractQueue<T> {
 	private boolean hasLeft(int i) {
 		return (i >= 0 && getLeft(i) < heap.size());
 	}
-	
+
 	private boolean hasRight(int i) {
 		return (i >= 0 && getRight(i) < heap.size());
 	}
@@ -79,7 +79,7 @@ public class PriorityQueue<T> extends AbstractQueue<T> {
 		T element = heap.get(index);
 		int parentIndex = getParent(index);
 		T parent = heap.get(parentIndex);
-		
+
 		while (hasParent(index) && comparator.compare(element, parent) < 0) {
 			heap.set(parentIndex, element);
 			heap.set(index, parent);
@@ -91,7 +91,7 @@ public class PriorityQueue<T> extends AbstractQueue<T> {
 
 		return result;
 	}
-	
+
 	@Override public boolean offer(T e) {
 		heap.add(e);
 		propogateUp(heap.size() - 1);
@@ -110,7 +110,7 @@ public class PriorityQueue<T> extends AbstractQueue<T> {
 		}
 		return result;
 	}
-	
+
 	@Override public T peek() {
 		return heap.get(0);
 	}

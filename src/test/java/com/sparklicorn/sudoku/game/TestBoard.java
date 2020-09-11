@@ -1,4 +1,4 @@
-package com.mycompany.app.sudoku;
+package com.sparklicorn.sudoku.game;
 
 import static org.junit.Assert.*;
 
@@ -6,7 +6,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import org.junit.Test;
 
-import com.mycompany.app.sudoku.puzzles.GeneratedPuzzles;
+import com.sparklicorn.sudoku.puzzles.GeneratedPuzzles;
 
 public class TestBoard {
 
@@ -68,7 +68,6 @@ public class TestBoard {
 
 	@Test
 	public void testGetNumEmptySpaces() {
-
 		Board b = new Board();
 
 		assertEquals(81, b.getNumEmptySpaces());
@@ -84,13 +83,10 @@ public class TestBoard {
 
 		b = new Board(".................................................................................");
 		assertEquals(81, b.getNumEmptySpaces());
-
 	}
 
-	//getNumClues
 	@Test
 	public void testGetNumClues() {
-
 		Board b = new Board();
 
 		assertEquals(0, b.getNumClues());
@@ -106,10 +102,8 @@ public class TestBoard {
 
 		b = new Board(".................................................................................");
 		assertEquals(0, b.getNumClues());
-
 	}
 
-	//clear
 	@Test
 	public void testClearBoard() {
 		Board b = new Board();
@@ -137,7 +131,6 @@ public class TestBoard {
 		assertArrayEquals(new int[81], b.getValues(new int[81]));
 	}
 
-	//getValues
 	@Test
 	public void testGetValues() {
 		Board b = new Board();
@@ -171,7 +164,6 @@ public class TestBoard {
 		assertArrayEquals(new int[Board.NUM_CELLS], b.getValues(new int[81]));
 	}
 
-	//getValueAt
 	@Test
 	public void testGetValueAt() {
 		Board b = new Board();
@@ -209,24 +201,19 @@ public class TestBoard {
 		}
 	}
 
-	//setValueAt
 	@Test
 	public void testSetValueAt() {
 		Board b = new Board();
-
 		for (int i = 0; i < Board.NUM_CELLS; i++) {
 			for (int v = 0; v <= 9; v++) {
 				b.setValueAt(i, v);
 				assertEquals(v, b.getValueAt(i));
 			}
 		}
-
 	}
 
-	//equals
 	@Test
 	public void testEquals() {
-
 		//Test comparison with empty board.
 		Board emptyBoard = new Board();
 
@@ -275,12 +262,10 @@ public class TestBoard {
 				assertEquals(false, b.equals(new Board(VALID_CONFIGS[j])));
 			}
 		}
-
 	}
 
 	@Test
 	public void testCopy() {
-
 		//Test empty board copy.
 		Board b = new Board();
 		Board b2 = b.copy();
@@ -460,10 +445,8 @@ public class TestBoard {
 				assertEquals(false, b.isRowValid(r));
 			}
 		}
-
 	}
 
-	//isColValid
 	@Test
 	public void testIsColValid() {
 		//Test empty rows (valid).
@@ -558,7 +541,6 @@ public class TestBoard {
 		}
 	}
 
-	//isRegionValid
 	@Test
 	public void testIsRegionValid() {
 		//Test empty regions (valid).
@@ -661,7 +643,6 @@ public class TestBoard {
 		}
 	}
 
-	//isFull
 	@Test
 	public void testIsFull() {
 		//Test empty board fullness.
@@ -685,7 +666,6 @@ public class TestBoard {
 		assertEquals(true, b.isFull());
 	}
 
-	//isSolved
 	@Test
 	public void testSolved() {
 
@@ -707,7 +687,5 @@ public class TestBoard {
 		for (String c : INVALID_CONFIGS) {
 			assertEquals(false, (new Board(c)).isSolved());
 		}
-
 	}
-
 }

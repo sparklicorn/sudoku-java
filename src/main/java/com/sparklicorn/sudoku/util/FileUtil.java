@@ -1,4 +1,4 @@
-package com.mycompany.app.util;
+package com.sparklicorn.sudoku.util;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -15,10 +15,9 @@ import java.util.Scanner;
 
 /**
  * Provides utility methods for working with files, HTTP connections.
- * @author Jeff
  */
 public class FileUtil {
-	
+
 	/**
 	 * Returns a List containing the absolute paths of files found matching
 	 * the given criteria in the given directory.
@@ -44,7 +43,7 @@ public class FileUtil {
 		}
 		return result;
 	}
-		
+
 	/** Returns the content of a file.*/
 	public static String getFileContent(String filepath) {
 		StringBuilder s = new StringBuilder();
@@ -59,7 +58,7 @@ public class FileUtil {
 		}
 		return s.toString();
 	}
-	
+
 	/** Returns the content of a file.*/
 	public static String getFileContent(File file) {
 		StringBuilder s = new StringBuilder();
@@ -73,7 +72,7 @@ public class FileUtil {
 		}
 		return s.toString().trim();
 	}
-	
+
 	/**
 	 * Attempts to read data from the given HttpURLConnection and save it with
 	 * the specified filename.
@@ -85,7 +84,7 @@ public class FileUtil {
 			try (
 					PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(filename)));
 					BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
-				
+
 				String input;
 				while ((input = br.readLine()) != null) {
 					pw.println(input);
@@ -97,6 +96,7 @@ public class FileUtil {
 			throw new NullPointerException("Provided HttspURLConnection was null.");
 		}
 	}
+
 	 /** Attempts to read and return data from the given HttpURLConnection.*/
 	public static String getContent(HttpURLConnection con) {
 		StringBuilder strb = new StringBuilder();
@@ -120,5 +120,4 @@ public class FileUtil {
 		}
 		return strb.toString();
 	}
-	
 }

@@ -1,4 +1,4 @@
-package com.mycompany.app.util;
+package com.sparklicorn.sudoku.util;
 
 @FunctionalInterface
 public interface Callback<T> {

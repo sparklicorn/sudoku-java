@@ -1,4 +1,4 @@
-package com.mycompany.app.sudoku;
+package com.sparklicorn.sudoku.game.solvers;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -10,16 +10,11 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.mycompany.app.util.Callback;
-import com.mycompany.app.util.PriorityQueue;
+import static com.sparklicorn.sudoku.game.Board.*;
 
-import static com.mycompany.app.sudoku.Board.*;
+import com.sparklicorn.sudoku.game.*;
+import com.sparklicorn.sudoku.util.*;
 
-/**
- *
- *
- * @author Jeff
- */
 public class Solver {
 
 	public static interface SolutionFoundCallback {

@@ -1,9 +1,9 @@
-package com.mycompany.app.sudoku.puzzles;
+package com.sparklicorn.sudoku.puzzles;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.mycompany.app.sudoku.Board;
+import com.sparklicorn.sudoku.game.Board;
 
 public class GeneratedPuzzles {
 

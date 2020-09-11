@@ -1,4 +1,4 @@
-package com.mycompany.app.gui;
+package com.sparklicorn.sudoku.drivers.gui;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -23,12 +23,12 @@ import java.io.InputStream;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-import com.mycompany.app.sudoku.Board;
-import static com.mycompany.app.sudoku.Board.*;
+import com.sparklicorn.sudoku.game.Board;
+import static com.sparklicorn.sudoku.game.Board.*;
 
 @SuppressWarnings("serial")
 public class SudokuBoard extends JPanel implements ComponentListener {
-	
+
 	private static Color[] COLORS = new Color[] {
 		Color.WHITE,
 		Color.RED,
@@ -37,45 +37,45 @@ public class SudokuBoard extends JPanel implements ComponentListener {
 		Color.GREEN,
 		Color.CYAN,
 		Color.BLUE,
-		
+
 		//new Color(0.3f, 0f, 0.51f), purple
 		new Color(0f, 0.5f, 0f),
-		
+
 		new Color(0.8f, 0f, 0.8f),
 		new Color(1f, 0.75f, 0.76f),
 	};
-	
+
 	protected float fillRatio;
-	
+
 	protected Board board;
 	protected Font font;
-	
+
 	protected int borderSize = 2;
-	
+
 	protected SudokuCell[] cells;
-	
+
 	protected static class SudokuCell extends JComponent implements MouseListener, KeyListener, MouseWheelListener {
-		
+
 		protected static SudokuCell selectedCell = null;
 		protected static SudokuCell highlightedCell = null;
-		
+
 		protected static int size;
 		protected static Font font;
-		
+
 		protected int digit;
-		
+
 		public SudokuCell(int digit) {
 			this.digit = digit;
-			
+
 			this.addMouseListener(this);
 			this.setFocusable(true);
 			this.addKeyListener(this);
 			this.addMouseWheelListener(this);
 		}
-		
+
 		@Override protected void paintComponent(Graphics g) {
 			super.paintComponent(g);
-			
+
 			Graphics2D g2 = (Graphics2D) g;
 			g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
 			if (digit > 0) {
@@ -85,7 +85,7 @@ public class SudokuBoard extends JPanel implements ComponentListener {
 				g2.setFont(font);
 				g2.drawString(Integer.toString(digit), size/4, size - size/8);
 			}
-			
+
 			g2.setColor(Color.BLACK);
 			if (highlightedCell == this || selectedCell == this) {
 				int stroke = 3;
@@ -135,18 +135,18 @@ public class SudokuBoard extends JPanel implements ComponentListener {
 			if (selectedCell == this || highlightedCell == this) {
 				System.out.println("on selected/highlighted cell");
 				System.out.println("e.getKeyCode() = " + e.getKeyCode());
-				
+
 				boolean numberKey = e.getKeyCode() >= KeyEvent.VK_1 && e.getKeyCode() <= KeyEvent.VK_9;
 				boolean numpadKey = e.getKeyCode() >= KeyEvent.VK_NUMPAD1 && e.getKeyCode() <= KeyEvent.VK_NUMPAD9;
-				
+
 				if (numberKey) {
 					System.out.println("setting digit to " + (e.getKeyCode() - KeyEvent.VK_1 + 1));
 					digit = e.getKeyCode() - KeyEvent.VK_1 + 1;
-				
+
 				} else if (numpadKey) {
 					System.out.println("setting digit to " + (e.getKeyCode() - KeyEvent.VK_NUMPAD1 + 1));
 					digit = e.getKeyCode() - KeyEvent.VK_NUMPAD1 + 1;
-					
+
 				} else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
 					digit = 0;
 					System.out.println("erasing digit");
@@ -157,13 +157,13 @@ public class SudokuBoard extends JPanel implements ComponentListener {
 		@Override public void keyReleased(KeyEvent e) {}
 		@Override public void mouseWheelMoved(MouseWheelEvent e) {}
 	}
-	
+
 	public SudokuBoard(Board board) {
-		
+
 		this.fillRatio = 0.8f;
 		this.board = board;
 		this.cells = new SudokuCell[NUM_CELLS];
-		
+
 		try {
 			InputStream fontfs = ClassLoader.getSystemClassLoader().getResourceAsStream("Roboto-Regular.ttf");
 			font = Font.createFont(Font.TRUETYPE_FONT, fontfs);
@@ -173,21 +173,21 @@ public class SudokuBoard extends JPanel implements ComponentListener {
 			font = new Font("Consolas", Font.PLAIN, 24);
 		}
 		SudokuCell.font = font.deriveFont(24f);
-		
+
 		setBackground(Color.white);
-		
+
 		addMouseListener(new MouseListener() {
 			@Override public void mouseClicked(MouseEvent e) {}
 			@Override public void mousePressed(MouseEvent e) {
 				/*
 				if (e.getButton() == MouseEvent.BUTTON1) {
-					
+
 					int w = getWidth();
 					int h = getHeight();
 					int cellSize = (int) (Math.min(w, h) * fillRatio/9);
 					int xOffset = (w - cellSize*9)/2 - 2*borderSize;
 					int yOffset = (h - cellSize*9)/2 - 2*borderSize;
-					
+
 					int x = e.getX() - xOffset;
 					x -= (x/cellSize) * borderSize;
 					int y = e.getY() - yOffset;
@@ -203,7 +203,7 @@ public class SudokuBoard extends JPanel implements ComponentListener {
 					} else {
 						//selectedSquare = -1;
 					}
-					
+
 					repaint();
 				} else {
 					//selectedSquare = -1;
@@ -214,7 +214,7 @@ public class SudokuBoard extends JPanel implements ComponentListener {
 			@Override public void mouseEntered(MouseEvent e) { }
 			@Override public void mouseExited(MouseEvent e) { }
 		});
-		
+
 		addMouseMotionListener(new MouseMotionListener() {
 			@Override public void mouseDragged(MouseEvent e) {}
 			@Override public void mouseMoved(MouseEvent e) {
@@ -223,10 +223,10 @@ public class SudokuBoard extends JPanel implements ComponentListener {
 				int d = (int) (Math.min(size.width, size.height) * 0.9 / 8);
 				int xOffset = (size.width - d * 8) / 2;
 				int yOffset = (size.height - d * 8) / 2;
-				
+
 				int x = e.getX() - xOffset;
 				int y = e.getY() - yOffset;
-				
+
 				if (x > 0 && x < d * 8 && y > 0 && y < d * 8) {
 					int row = y / d;
 					int col = x / d;
@@ -238,32 +238,32 @@ public class SudokuBoard extends JPanel implements ComponentListener {
 				repaint();
 			}
 		});
-		
+
 		addComponentListener(this);
-		
+
 		this.setLayout(null);
 		for (int i = 0; i < NUM_CELLS; i++) {
 			cells[i] = new SudokuCell(board.getValueAt(i));
 			add(cells[i]);
 		}
-		
+
 	}
-	
+
 	@Override protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		
+
 		int w = this.getWidth();
 		int h = this.getHeight();
 		int cellSize = (int) (Math.min(w, h) * fillRatio / 9);
 		int xOffset = (w - cellSize * 9) / 2 - 2 * borderSize;
 		int yOffset = (h - cellSize * 9) / 2 - 2 * borderSize;
-		
+
 		SudokuCell.size = cellSize;
-		
+
 		Graphics2D g2 = (Graphics2D) g;
 		g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
 				RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
-		
+
 		//paint all cells, borders/grid
 		/*
 		g2.setColor(Color.BLACK);
@@ -277,12 +277,12 @@ public class SudokuBoard extends JPanel implements ComponentListener {
 					yOffset + borderSize * ((r / 3) + 1) + r * cellSize,
 					cellSize, cellSize, true);
 		}
-		
+
 		g2.setColor(Color.BLACK);
 		for (int i = 0; i < Board.NUM_CELLS; i++) {
 			int r = i / 9;
 			int c = i % 9;
-			
+
 			//g2.drawRect(
 			//			xOffset + borderSize * ((c / 3) + 1) + c * cellSize,
 			//			yOffset + borderSize * ((r / 3) + 1) + r * cellSize,
@@ -294,11 +294,11 @@ public class SudokuBoard extends JPanel implements ComponentListener {
 			}
 		}
 		*/
-		
+
 		//g2.setColor(Color.BLACK);
 		Stroke stroke = g2.getStroke();
 		g2.setStroke(new BasicStroke(borderSize));
-		
+
 		//draw separating lines and border
 		g2.drawLine(
 				xOffset + borderSize + cellSize*3 + borderSize/2, yOffset + borderSize,
@@ -317,7 +317,7 @@ public class SudokuBoard extends JPanel implements ComponentListener {
 				cellSize*9 + borderSize*3 - 1, cellSize*9 + borderSize*3 - 1);
 
 		g2.setStroke(stroke);
-		
+
 	}
 
 	@Override public void componentResized(ComponentEvent e) {
@@ -326,7 +326,7 @@ public class SudokuBoard extends JPanel implements ComponentListener {
 		int cellSize = (int) (Math.min(w, h) * fillRatio / 9);
 		int xOffset = (w - cellSize * 9) / 2 - 2 * borderSize;
 		int yOffset = (h - cellSize * 9) / 2 - 2 * borderSize;
-		
+
 		SudokuCell.size = cellSize;
 		SudokuCell.font = font.deriveFont((float) cellSize);
 
@@ -339,11 +339,11 @@ public class SudokuBoard extends JPanel implements ComponentListener {
 					yOffset + borderSize * ((r / 3) + 1) + r * cellSize,
 					cellSize, cellSize);
 		}
-		
+
 	}
 
 	@Override public void componentMoved(ComponentEvent e) {}
 	@Override public void componentShown(ComponentEvent e) {}
 	@Override public void componentHidden(ComponentEvent e) {}
-	
+
 }

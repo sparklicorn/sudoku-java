@@ -1,11 +1,12 @@
-package com.mycompany.app.sudoku;
+package com.sparklicorn.sudoku.game.generators;
 
 import java.util.HashSet;
+
+import com.sparklicorn.sudoku.game.*;
 
 public class GenerateConfigs {
 
     public static void main(String[] args) {
-        
         int numConfigs = 1; //Number of configs to generate.
         boolean normalize = false;
 
@@ -35,7 +36,5 @@ public class GenerateConfigs {
                 System.out.println(b.getSimplifiedString());
             }
         }
-
     }
-
 }

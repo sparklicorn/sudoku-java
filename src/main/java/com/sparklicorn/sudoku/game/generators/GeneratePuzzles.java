@@ -1,6 +1,6 @@
-package com.mycompany.app.sudoku;
+package com.sparklicorn.sudoku.game.generators;
 
-import com.mycompany.app.util.ThreadPool;
+import com.sparklicorn.sudoku.util.ThreadPool;
 
 public class GeneratePuzzles {
 

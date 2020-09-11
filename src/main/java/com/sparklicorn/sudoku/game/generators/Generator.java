@@ -1,4 +1,4 @@
-package com.mycompany.app.sudoku;
+package com.sparklicorn.sudoku.game.generators;
 
 import java.util.Stack;
 import java.util.Set;
@@ -8,6 +8,9 @@ import java.util.Queue;
 import java.util.ArrayDeque;
 
 import java.util.concurrent.ThreadLocalRandom;
+
+import com.sparklicorn.sudoku.game.*;
+import com.sparklicorn.sudoku.game.solvers.*;
 
 public class Generator {
 

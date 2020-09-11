@@ -1,4 +1,4 @@
-package com.mycompany.app.drivers;
+package com.sparklicorn.sudoku.drivers;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,15 +14,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
-import com.mycompany.app.gui.SudokuGuiDemo;
-import com.mycompany.app.sudoku.Board;
-import com.mycompany.app.sudoku.GenerateConfigs;
-import com.mycompany.app.sudoku.GeneratePuzzles;
-import com.mycompany.app.sudoku.Generator;
-import com.mycompany.app.sudoku.Solver;
-import com.mycompany.app.sudoku.puzzles.GeneratedPuzzles;
-import com.mycompany.app.util.ThreadPool;
+import com.sparklicorn.sudoku.game.Board;
+import com.sparklicorn.sudoku.game.generators.*;
+import com.sparklicorn.sudoku.game.solvers.Solver;
+import com.sparklicorn.sudoku.puzzles.GeneratedPuzzles;
+import com.sparklicorn.sudoku.drivers.gui.SudokuGuiDemo;
+import com.sparklicorn.sudoku.util.ThreadPool;
 
 /**
  * Main driver for the Sudoku project. Commands/Options:

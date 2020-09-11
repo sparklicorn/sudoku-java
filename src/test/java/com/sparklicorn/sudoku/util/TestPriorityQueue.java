@@ -1,4 +1,4 @@
-package com.mycompany.app.util;
+package com.sparklicorn.sudoku.util;
 
 import static org.junit.Assert.*;
 
@@ -8,16 +8,13 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import org.junit.Test;
 
-
 public class TestPriorityQueue {
 
     @Test
     public void testConstructor() {
-
-        PriorityQueue<Integer> pq = new PriorityQueue<>((Integer a, Integer b) -> {
+        new PriorityQueue<>((Integer a, Integer b) -> {
             return Integer.compare(a, b);
         });
-
     }
 
     @Test
@@ -40,7 +37,6 @@ public class TestPriorityQueue {
         for (int x : list) {
             pq.offer(x);
         }
-
     }
 
     @Test
@@ -69,8 +65,5 @@ public class TestPriorityQueue {
         for (int i = 0; i < n; i++) {
             assertEquals(sortedList.get(i), pq.poll());
         }
-
     }
-
-
 }

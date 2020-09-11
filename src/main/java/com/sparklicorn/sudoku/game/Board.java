@@ -1,4 +1,4 @@
-package com.mycompany.app.sudoku;
+package com.sparklicorn.sudoku.game;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -24,8 +24,6 @@ import java.util.List;
  * And lastly,
  * <li><code>000000000</code> represents no possible candidate values.</li>
  * </ul>
- *
- * @author Jeff
  */
 public class Board implements ISudokuBoard, Serializable {
 

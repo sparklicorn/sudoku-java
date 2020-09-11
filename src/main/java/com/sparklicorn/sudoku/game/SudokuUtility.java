@@ -1,4 +1,4 @@
-package com.mycompany.app.sudoku;
+package com.sparklicorn.sudoku.game;
 
 public class SudokuUtility {
 
@@ -10,7 +10,7 @@ public class SudokuUtility {
     public static Board normalize(Board board) {
         return new Board(normalize(board.getValues(new int[Board.NUM_CELLS])));
     }
-    
+
     /**
      * Returns the board (int[]) that has been normalized.
      * A board is "normalized" when the top row reads "123456789".
@@ -48,5 +48,4 @@ public class SudokuUtility {
     public static boolean isPermutation(Board a, Board b) {
         return normalize(a).equals(normalize(b));
     }
-
 }

@@ -1,4 +1,4 @@
-package com.mycompany.app.util;
+package com.sparklicorn.sudoku.util;
 
 import java.util.List;
 import java.util.Queue;
