@@ -13,15 +13,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 
 import com.sparklicorn.sudoku.game.Board;
 import com.sparklicorn.sudoku.game.generators.*;
 import com.sparklicorn.sudoku.game.solvers.Solver;
 import com.sparklicorn.sudoku.puzzles.GeneratedPuzzles;
 import com.sparklicorn.sudoku.drivers.gui.SudokuGuiDemo;
-import com.sparklicorn.sudoku.util.ThreadPool;
+import com.sparklicorn.util.ThreadPool;
 
 /**
  * Main driver for the Sudoku project. Commands/Options:
@@ -85,10 +88,8 @@ public class Main {
                         System.out.println(b.getSimplifiedString());
                     });
                 } else {
-                    System.out.println(
-                        "Usage: solve {board string, ex: ...234...657...198" +
-                        "...............................................................}"
-                    );
+                    System.out.println("Usage: solve {board string, ex: ...234...657...198"
+                            + "...............................................................}");
                 }
                 break;
             case "generate":
@@ -167,12 +168,11 @@ public class Main {
     }
 
     private static void benchy(boolean verbose) {
-        List<Board> boards = GeneratedPuzzles.convertStringsToBoards(
-            GeneratedPuzzles.PUZZLES_24_1000
-        );
+        List<Board> boards = GeneratedPuzzles.convertStringsToBoards(GeneratedPuzzles.PUZZLES_24_1000);
 
         System.out.printf("%d boards loaded.%n", boards.size());
 
+        CountDownLatch countDownLatch = new CountDownLatch(boards.size());
         List<Runnable> timedBoardSolvers = new ArrayList<>();
         List<Long> solveTimes = Collections.synchronizedList(new ArrayList<>());
         for (Board b : boards) {
@@ -183,32 +183,63 @@ public class Main {
                         System.out.printf("%s  =>  %s%n", b.getSimplifiedString(), solution.getSimplifiedString());
                     }
                 });
-                // System.out.printf("Puzzle solved in %d ms.%n", TimeUnit.NANOSECONDS.toMillis(cpuTime));
+                // System.out.printf("Puzzle solved in %d ms.%n",
+                // TimeUnit.NANOSECONDS.toMillis(cpuTime));
                 solveTimes.add(cpuTime);
+                countDownLatch.countDown();
             });
         }
 
-        final long startRealTime = System.currentTimeMillis();
         final int numThreads = Runtime.getRuntime().availableProcessors();
-        ThreadPool.doBatch(
-            timedBoardSolvers,
-            numThreads,
-            () -> {
-                long totalCpuTime = 0L;
-                for (long time : solveTimes) {
-                    totalCpuTime += time;
-                }
-                System.out.printf(
-                    "%nReal time to solve all puzzles: %s.%n",
-                    formatDuration(System.currentTimeMillis() - startRealTime)
-                );
-                System.out.printf(
-                    "Total cpu time to solve all puzzles: %s [%s / thread].%n",
-                    formatDuration(TimeUnit.NANOSECONDS.toMillis(totalCpuTime)),
-                    formatDuration(TimeUnit.NANOSECONDS.toMillis(totalCpuTime / numThreads))
-                    );
-                System.out.printf("Using %d threads.%n", numThreads);
-            }
+        BlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<>(1000);
+        ThreadPoolExecutor t = new ThreadPoolExecutor(numThreads, numThreads, 1L, TimeUnit.SECONDS, workQueue);
+        t.prestartAllCoreThreads();
+
+        final long startRealTime = System.currentTimeMillis();
+        for (Runnable solver : timedBoardSolvers) {
+            t.submit(solver);
+        }
+
+        try {
+            countDownLatch.await(1L, TimeUnit.MINUTES);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        t.shutdownNow();
+
+        if (countDownLatch.getCount() > 0) {
+            System.out.println("TIMEOUT -- DID NOT SOLVE ALL PUZZLES IN TIME (1 MINUTE)");
+            return;
+        }
+
+        long totalCpuTime = 0L;
+        for (long time : solveTimes) {
+            totalCpuTime += time;
+        }
+        System.out.printf(
+            "%nReal time to solve all puzzles: %s.%n",
+            formatDuration(System.currentTimeMillis() - startRealTime)
+        );
+        System.out.printf(
+            "Total cpu time to solve all puzzles: %s [%s / thread].%n",
+            formatDuration(TimeUnit.NANOSECONDS.toMillis(totalCpuTime)),
+            formatDuration(TimeUnit.NANOSECONDS.toMillis(totalCpuTime / numThreads))
+        );
+        System.out.printf("Using %d threads.%n", numThreads);
+
+        System.out.println();
+        System.out.print("Solving all single-threaded... ");
+        long cpuTimeSingleThreaded = 0L;
+        for (Board b : boards) {
+            cpuTimeSingleThreaded += timeCpuExecution(() -> {
+                Solver.solve(b);
+            });
+        }
+        System.out.println("Done.");
+        System.out.printf(
+            "Total cpu time to solve all puzzles with single-thread: %s.%n",
+            formatDuration(TimeUnit.NANOSECONDS.toMillis(cpuTimeSingleThreaded))
         );
     }
 
