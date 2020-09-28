@@ -24,7 +24,6 @@ import com.sparklicorn.sudoku.game.generators.*;
 import com.sparklicorn.sudoku.game.solvers.Solver;
 import com.sparklicorn.sudoku.puzzles.GeneratedPuzzles;
 import com.sparklicorn.sudoku.drivers.gui.SudokuGuiDemo;
-import com.sparklicorn.util.ThreadPool;
 
 /**
  * Main driver for the Sudoku project. Commands/Options:
@@ -97,7 +96,7 @@ public class Main {
                 Board[] configs = new Board[numConfigs];
                 int interval = numConfigs / 100;
                 for (int i = 0; i < numConfigs; i++) {
-                    if (i % interval == 0 && i > 0) {
+                    if (i > 100 && i % interval == 0) {
                         System.out.print('.');
                     }
                     configs[i] = Generator.generateConfig();

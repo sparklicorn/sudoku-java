@@ -255,6 +255,7 @@ public class Generator {
     }
 
     //Random permutation of the digits 1 - n, stored in list.
+    @SuppressWarnings("unused")
     private static List<Integer> randPerm(int n, List<Integer> list) {
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
 		ArrayList<Integer> bag = new ArrayList<>(n);

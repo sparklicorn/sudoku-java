@@ -1,6 +1,9 @@
 package com.sparklicorn.sudoku.game.generators;
 
-import com.sparklicorn.sudoku.util.ThreadPool;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class GeneratePuzzles {
 
@@ -21,10 +24,17 @@ public class GeneratePuzzles {
         final int clues = numClues;
 
         int numThreads = Runtime.getRuntime().availableProcessors();
-        Runnable work = () -> {
-            System.out.println(Generator.generatePuzzle(clues).getSimplifiedString());
-        };
 
-        ThreadPool.repeatWork(work, numPuzzles, numThreads, null);
+        BlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<>(numPuzzles);
+        ThreadPoolExecutor pool = new ThreadPoolExecutor(numThreads, numThreads, 1L, TimeUnit.SECONDS, workQueue);
+        pool.prestartAllCoreThreads();
+
+        for (int n = 0; n < numPuzzles; n++) {
+            pool.submit(() -> {
+                System.out.println(Generator.generatePuzzle(clues).getSimplifiedString());
+            });
+        }
+
+        pool.shutdown();
     }
 }

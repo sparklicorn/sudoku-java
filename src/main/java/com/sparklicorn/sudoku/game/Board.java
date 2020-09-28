@@ -27,7 +27,6 @@ import java.util.List;
  */
 public class Board implements ISudokuBoard, Serializable {
 
-	//TODO - Regenerate this value upon modifying class.
 	private static final long serialVersionUID = -6346231818157404798L;
 
 	/* ****************************************************
