@@ -509,14 +509,11 @@ public class Solver {
 	}
 
 	private static int reduceRegion(int[] masks, int index, int candidates) {
-	    int gr = (index / 9) / 3; //grid row [0,2]
-	    int gc = (index % 9) / 3; //grid column [0,2]
-	    for (int i = 0; i < 9; i++) { //i = index of cells in region
-	    	int bi = gr*27 + gc*3 + (i / 3)*9 + (i%3); //index of region cell i in masks
-	        if (bi == index)
+	    for (int i : REGION_INDICES[Board.getRegionForIndex(index)]) {
+	        if (i == index)
 				continue;
 
-	    	int v = masks[bi];
+	    	int v = masks[i];
 	        if (decode(v) > 0) {
 	            if ((candidates ^ v) < candidates) {
 	                candidates ^= v;
@@ -528,7 +525,7 @@ public class Solver {
 
 	private static int reduceCol(int[] masks, int index, int candidates) {
 		int c = index % 9;
-	    for (int i = c; i < 81; i += 9) {
+	    for (int i : COL_INDICES[c]) {
 	        if (i == index)
 				continue;
 
@@ -544,7 +541,7 @@ public class Solver {
 
 	private static int reduceRow(int[] masks, int index, int candidates) {
 		int r = index / 9;
-		for (int i = r * 9; i < (r + 1) * 9; i++) {
+		for (int i : ROW_INDICES[r]) {
 	        if (i == index)
 	            continue;
 
@@ -557,5 +554,4 @@ public class Solver {
 	    }
 		return candidates;
 	}
-
 }

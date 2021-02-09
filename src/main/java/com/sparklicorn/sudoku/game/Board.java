@@ -52,11 +52,38 @@ public class Board implements ISudokuBoard, Serializable {
 	 * board[z] real value may be 2, 6, 7, 8, 9, to be resolved by user later.
 	 ******************************************************/
 
+	public static final int NUM_DIGITS = 9;
+	public static final int NUM_ROWS_IN_REGION = 3;
+	public static final int NUM_COLS_IN_REGION = 3;
+
 	/** Number of cells in a standard Sudoku board.*/
-	public static final int NUM_CELLS = 81;
+	public static final int NUM_CELLS = NUM_DIGITS * NUM_DIGITS;
 
 	/** Represents the combination of all candidate values.*/
 	public static final int ALL = 0x1ff;
+
+	public static final int[][] ROW_INDICES = new int[NUM_DIGITS][];
+	public static final int[][] COL_INDICES = new int[NUM_DIGITS][];
+	public static final int[][] REGION_INDICES = new int[NUM_DIGITS][];
+	static {
+		for (int i = 0; i < NUM_DIGITS; i++) {
+			ROW_INDICES[i] = getRowIndices(i);
+			COL_INDICES[i] = getColIndices(i);
+			REGION_INDICES[i] = getRegionIndices(i);
+		}
+	}
+
+	public static int getRowForIndex(int i) {
+		return i / 9;
+	}
+
+	public static int getColForIndex(int i) {
+		return i % 9;
+	}
+
+	public static int getRegionForIndex(int i) {
+		return i / 9 + (i % 9);
+	}
 
 	/**
 	 * Looks up the real Sudoku board value from the given bitstring version.
@@ -416,6 +443,33 @@ public class Board implements ISudokuBoard, Serializable {
 		return true;
 	}
 
+	public static int[] getRowIndices(int row) {
+		int[] result = new int[NUM_DIGITS];
+		for (int i = 0; i < NUM_DIGITS; i++) {
+			result[i] = row * NUM_DIGITS + i;
+		}
+		return result;
+	}
+
+	public static int[] getColIndices(int col) {
+		int[] result = new int[NUM_DIGITS];
+		for (int i = 0; i < NUM_DIGITS; i++) {
+			result[i] = col + i * NUM_DIGITS;
+		}
+		return result;
+	}
+
+	public static int[] getRegionIndices(int region) {
+		int[] result = new int[NUM_DIGITS];
+		int gr = region / NUM_ROWS_IN_REGION;
+		int gc = region % NUM_COLS_IN_REGION;
+		for (int i = 0; i < NUM_DIGITS; i++) {
+			result[i] = gr*NUM_DIGITS*NUM_ROWS_IN_REGION + gc*NUM_COLS_IN_REGION +
+				(i/NUM_ROWS_IN_REGION)*NUM_DIGITS + (i%NUM_COLS_IN_REGION);
+		}
+		return result;
+	}
+
 	/**
 	 * Determines whether the given row on the given board is valid.
 	 * <br/>A row is considered valid if it contains no duplicate digits
@@ -426,7 +480,7 @@ public class Board implements ISudokuBoard, Serializable {
 	 */
 	public boolean isRowValid(int row) {
 		int c = 0;
-		for (int i = row * 9, nextRow = (row + 1) * 9; i < nextRow; i++) {
+		for (int i : ROW_INDICES[row]) {
 			int digit = getValueAt(i);
 			if (digit > 0 && digit <= 9) {
 				int mask = 1 << (digit - 1);
@@ -434,6 +488,15 @@ public class Board implements ISudokuBoard, Serializable {
 					return false;
 				}
 				c |= mask;
+			}
+		}
+		return true;
+	}
+
+	public boolean isRowFull(int row) {
+		for (int i = row * 9, nextRow = (row + 1) * 9; i < nextRow; i++) {
+			if (getValueAt(i) == 0) {
+				return false;
 			}
 		}
 		return true;
@@ -449,7 +512,7 @@ public class Board implements ISudokuBoard, Serializable {
 	 */
 	public boolean isColValid(int column) {
 		int c = 0;
-		for (int i = column; i < NUM_CELLS; i += 9) {
+		for (int i : COL_INDICES[column]) {
 			int digit = getValueAt(i);
 			if (digit > 0 && digit <= 9) {
 				int mask = 1 << (digit - 1);
@@ -457,6 +520,15 @@ public class Board implements ISudokuBoard, Serializable {
 					return false;
 				}
 				c |= mask;
+			}
+		}
+		return true;
+	}
+
+	public boolean isColFull(int column) {
+		for (int i : COL_INDICES[column]) {
+			if (getValueAt(i) == 0) {
+				return false;
 			}
 		}
 		return true;
@@ -472,16 +544,23 @@ public class Board implements ISudokuBoard, Serializable {
 	 */
 	public boolean isRegionValid(int region) {
 		int c = 0;
-		int gr = region / 3;
-		int gc = region % 3;
-		for (int i = 0; i < 9; i++) {
-			int digit = getValueAt(gr*27 + gc*3 + (i/3)*9 + (i%3));
+		for (int i : REGION_INDICES[region]) {
+			int digit = getValueAt(i);
 			if (digit > 0 && digit <= 9) {
 				int mask = 1 << (digit - 1);
 				if ((c & mask) != 0) {
 					return false;
 				}
 				c |= mask;
+			}
+		}
+		return true;
+	}
+
+	public boolean isRegionFull(int region) {
+		for (int i : REGION_INDICES[region]) {
+			if (getValueAt(i) == 0) {
+				return false;
 			}
 		}
 		return true;
