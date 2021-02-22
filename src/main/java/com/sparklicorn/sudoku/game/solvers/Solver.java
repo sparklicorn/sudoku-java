@@ -448,49 +448,42 @@ public class Solver {
 		return result;
 	}
 
-	/**
-	 * Attempts to fill in the most obvious cells on the board.
-	 * <br/>It is possible that this method solves the puzzle.
-	 * @param board - the Sudoku board to work on.
-	 * @return True if the board was changed as a result of this call;
-	 * otherwise false.
-	 */
-	protected static boolean reduce(Board board) {
+	protected static void reduce(Board board) {
 		if (board.isFull()) {
-			return false;
+			return;
 		}
 
-		//reduce until we can't reduce no more
-	    boolean overallChange = false;
-		boolean changed = false;
+		while (reduce2(board));
+	}
 
-	    int[] masks = board.getMasks(new int[NUM_CELLS]);
+	private static boolean reduce2(Board board) {
+		for (int row = 0; row < NUM_ROWS; row++) {
+			int used = board.getUsedDigitsInRow(row);
+			int filled = board.getFilledCellsInRow(row);
+			for (int d = 1; d <= NUM_DIGITS; d++) {
+				int mask = encode(d);
+				int c = -1;
+				if ((used & encode(d)) == 0) {
+					for (int i = 0; i < NUM_DIGITS; i++) {
+						if ((filled & (1 << i)) == 0) {
+							if (c > -1) {
+								c = -1;
+								break;
+							} else {
+								c = i;
+							}
+						}
+					}
+				}
 
-	    //Track positions that are not already reduced.
-	    ArrayList<Integer> indices = new ArrayList<>();
-	    for (int i = 0; i < NUM_CELLS; i++) {
-	    	if (board.getDigitAt(i) == 0) {
-	    		indices.add(i);
-	    		masks[i] = ALL;
-	    	}
-	    }
+				if (c > -1) {
+					board.setMaskAt(row * 9 + c, mask);
+					return true;
+				}
+			}
+		}
 
-		do {
-			changed = false;
-	        for (int i = indices.size() - 1; i >= 0; i--) {
-	        	int j = indices.get(i);
-	        	if (reduce(masks, j)) {
-	                changed = true;
-	                overallChange = true;
-	                board.setMaskAt(j, masks[j]);
-	            }
-	        	if (decode(masks[j]) > 0) {
-		    		indices.remove(i);
-		    	}
-	        }
-		} while (changed);
-
-	    return overallChange;
+		return false;
 	}
 
 	private static boolean reduce(int[] masks, int index) {
