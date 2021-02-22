@@ -16,7 +16,7 @@ public interface ISudokuBoard extends Iterable<Integer> {
 	 * Populates the given array with the values of the Sudoku board.
 	 * @param board - the array to fill with Sudoku board values.
 	 */
-	public int[] getValues(int[] board);
+	public int[] getDigits(int[] board);
 
 	/**
 	 * Gets the value on the Sudoku board at the given index.
@@ -24,7 +24,7 @@ public interface ISudokuBoard extends Iterable<Integer> {
 	 * topleft corner, to 80 for the bottomright.
 	 * @return The value on the board at the given position.
 	 */
-	public int getValueAt(int index);
+	public int getDigitAt(int index);
 
 	/**
 	 * Sets the value on the Sudoku board to the one given at the specified
@@ -32,7 +32,7 @@ public interface ISudokuBoard extends Iterable<Integer> {
 	 * @param index - the position on the board.
 	 * @param value - the value to set in the given position.
 	 */
-	public void setValueAt(int index, int value);
+	public void setDigitAt(int index, int value);
 
 	/**
 	 * Populates a list of candidate values that the Sudoku cell at the given

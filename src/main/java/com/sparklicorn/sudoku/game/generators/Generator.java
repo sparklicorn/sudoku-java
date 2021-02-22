@@ -40,9 +40,9 @@ public class Generator {
                 nexts = new Node[b.getNumClues()];
                 int index = 0;
                 for (int i = 0; i < Board.NUM_CELLS; i++) {
-                    if (b.getValueAt(i) > 0) {
+                    if (b.getDigitAt(i) > 0) {
                         Board bCopy = new Board(b);
-                        bCopy.setValueAt(i, 0);
+                        bCopy.setDigitAt(i, 0);
                         nexts[index++] = new Node(bCopy, this);
                     }
                 }
@@ -290,7 +290,7 @@ public class Generator {
 			    int gc = m%3;
 			    for (int i = 0; i < 9; i++) {
 			    	int bi = gr*27 + gc*3 + (i/3)*9 + (i%3);
-			    	board.setValueAt(bi, list[i]);
+			    	board.setDigitAt(bi, list[i]);
 			    }
 			}
 		}

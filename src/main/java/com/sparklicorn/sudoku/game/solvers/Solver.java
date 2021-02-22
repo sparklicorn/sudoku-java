@@ -219,7 +219,7 @@ public class Solver {
 				} else {
 					//int count = 0;
 					for (int i = 0; i < Board.NUM_CELLS; i++) {
-						if (b.getValueAt(i) == 0) {
+						if (b.getDigitAt(i) == 0) {
 							candidates.clear();
 							for (Board c : getCandidateBoards(b, i, candidates)) {
 								reduce(c);
@@ -311,7 +311,7 @@ public class Solver {
 
 			} else {
 				for (int i = 0; i < Board.NUM_CELLS; i++) {
-					if (b.getValueAt(i) == 0) {
+					if (b.getDigitAt(i) == 0) {
 						for (Board c : getCandidateBoards(b, i, candidates)) {
 							reduce(c);
 							q.offer(c);
@@ -366,10 +366,10 @@ public class Solver {
 			} else {
 				int count = 0;
 				for (int i = 0; i < Board.NUM_CELLS; i++) {
-					if (b.getValueAt(i) == 0) {
+					if (b.getDigitAt(i) == 0) {
 						for (int x = 1; x < 10; x++) {
 							Board c = b.copy();
-							c.setValueAt(i, x);
+							c.setDigitAt(i, x);
 							q.add(c);
 							count++;
 						}
@@ -428,7 +428,7 @@ public class Solver {
 		board.getCandidates(cellIndex, candidates);
 		for (int option : candidates) {
 			Board bCopy = new Board(board);
-			bCopy.setValueAt(cellIndex, option);
+			bCopy.setDigitAt(cellIndex, option);
 			queue.offer(bCopy);
 		}
 	}
@@ -442,7 +442,7 @@ public class Solver {
 		List<Board> result = new ArrayList<>();
 		for (int option : candidates) {
 			Board bCopy = new Board(board);
-			bCopy.setValueAt(cellIndex, option);
+			bCopy.setDigitAt(cellIndex, option);
 			result.add(bCopy);
 		}
 		return result;
@@ -469,7 +469,7 @@ public class Solver {
 	    //Track positions that are not already reduced.
 	    ArrayList<Integer> indices = new ArrayList<>();
 	    for (int i = 0; i < NUM_CELLS; i++) {
-	    	if (board.getValueAt(i) == 0) {
+	    	if (board.getDigitAt(i) == 0) {
 	    		indices.add(i);
 	    		masks[i] = ALL;
 	    	}

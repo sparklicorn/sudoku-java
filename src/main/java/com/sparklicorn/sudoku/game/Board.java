@@ -53,11 +53,16 @@ public class Board implements ISudokuBoard, Serializable {
 	 ******************************************************/
 
 	public static final int NUM_DIGITS = 9;
-	public static final int NUM_ROWS_IN_REGION = 3;
-	public static final int NUM_COLS_IN_REGION = 3;
 
-	/** Number of cells in a standard Sudoku board.*/
-	public static final int NUM_CELLS = NUM_DIGITS * NUM_DIGITS;
+	public static final int NUM_ROWS = NUM_DIGITS;
+    public static final int NUM_COLS = NUM_DIGITS;
+    public static final int NUM_REGIONS = NUM_DIGITS;
+	public static final int NUM_REGION_ROWS = 3;
+	public static final int NUM_REGION_COLS = 3;
+    public static final int NUM_CELLS = NUM_ROWS * NUM_COLS;
+
+    public static final int MIN_VALUE = 0;
+    public static final int MAX_VALUE = 9;
 
 	/** Represents the combination of all candidate values.*/
 	public static final int ALL = 0x1ff;
@@ -65,11 +70,19 @@ public class Board implements ISudokuBoard, Serializable {
 	public static final int[][] ROW_INDICES = new int[NUM_DIGITS][];
 	public static final int[][] COL_INDICES = new int[NUM_DIGITS][];
 	public static final int[][] REGION_INDICES = new int[NUM_DIGITS][];
+
+	public static final int[] INDEX_ROW = new int[NUM_CELLS];
+	public static final int[] INDEX_COL = new int[NUM_CELLS];
+	public static final int[] INDEX_REGION = new int[NUM_CELLS];
+
 	static {
 		for (int i = 0; i < NUM_DIGITS; i++) {
 			ROW_INDICES[i] = getRowIndices(i);
 			COL_INDICES[i] = getColIndices(i);
 			REGION_INDICES[i] = getRegionIndices(i);
+			INDEX_ROW[i] = getRowForIndex(i);
+			INDEX_COL[i] = getColForIndex(i);
+			INDEX_REGION[i] = getRegionForIndex(i);
 		}
 	}
 
@@ -82,24 +95,38 @@ public class Board implements ISudokuBoard, Serializable {
 	}
 
 	public static int getRegionForIndex(int i) {
-		return i / 9 + (i % 9);
+		int r = i / 9;
+		int c = i % 9;
+		return (r / NUM_REGION_ROWS) * NUM_REGION_COLS + c/NUM_REGION_COLS;
+	}
+
+	public static int getIndexInRegion(int i) {
+		int r = i / 9;
+		int c = i % 9;
+		return (r % NUM_REGION_ROWS) * NUM_REGION_COLS + (c % NUM_REGION_COLS);
 	}
 
 	/**
-	 * Looks up the real Sudoku board value from the given bitstring version.
-	 * If the bitstring does not represent a single value, then 0 is returned.
-	 * @param bits - bitstring board value.
+	 * Looks up the digit value associated with the given mask.
+	 * If the mask does not represent a single value, then 0 is returned.
+	 * @param mask - bitstring board value.
 	 * @return A digit from 0 to 9. A return of zero means the value is empty.
 	 */
-	public static int decode(int bits) {
-		return DECODER2[bits];
+	public static int decode(int mask) {
+		return DECODER2[mask];
+	}
+
+	/**
+	 * Returns the mask value associated with the given digit.
+	 */
+	public static int encode(int digit) {
+		return 1 << (digit - 1);
 	}
 
 	private static final int[] DECODER2 = new int[512];
 	static {
 		for (int i = 1; i <= 9; i++) {
-			int index = (1 << (i - 1));
-			DECODER2[index] = i;
+			DECODER2[encode(i)] = i;
 		}
 	}
 
@@ -114,18 +141,22 @@ public class Board implements ISudokuBoard, Serializable {
 		return DECODER2[bits] > 0;
 	}
 
-	/**
-	 * Represents the values of the Sudoku board.
-	 */
-	protected int[] board;
-
+	// Candidate values of the Sudoku board.
+	protected int[] values;
 	protected int numClues;
 
-	/** Creates a Board that is empty.*/
+	// cache of undiscovered digits by row
+	protected int[] usedDigitsByRow;
+	protected int[] usedDigitsByRegion;
+	protected int[] usedDigitsByCol;
+	// cache of empty cells by row
+	protected int[] filledCellsByRow;
+	protected int[] filledCellsByRegion;
+	protected int[] filledCellsByCol;
+
+	/** Creates an empty Sudoku Board*/
 	public Board() {
-		board = new int[NUM_CELLS];
-		Arrays.fill(board, ALL);
-		numClues = 0;
+		clear();
 	}
 
 	/**
@@ -136,31 +167,30 @@ public class Board implements ISudokuBoard, Serializable {
 	 * considered empty spaces.
 	 * @param values - String of values that will be used to populate the board.
 	 */
-	public Board(String values) {
-		if (values == null)
+	public Board(String str) {
+		if (str == null)
 			throw new NullPointerException("Given Board string is null.");
 
 		//Empty row shorthand.
-		values = values.replaceAll("-", "000000000");
+		str = str.replaceAll("-", "000000000");
 
-		if (values.length() > NUM_CELLS) {
-			values = values.substring(0, NUM_CELLS);
+		if (str.length() > NUM_CELLS) {
+			str = str.substring(0, NUM_CELLS);
 		}
 
-		while (values.length() < NUM_CELLS) {
-			values += "0";
+		while (str.length() < NUM_CELLS) {
+			str += "0";
 		}
 
 		//Non-conforming characters to ZERO.
-		values = values.replaceAll("[^1-9]", "0");
+		str = str.replaceAll("[^1-9]", "0");
 
-		board = new int[NUM_CELLS];
+		int[] values = new int[NUM_CELLS];
 		for (int i = 0; i < NUM_CELLS; i++) {
-			int v = values.charAt(i) - '0';
-			board[i] = (v > 0) ? (1 << (v - 1)) : ALL;
+			values[i] = str.charAt(i) - '0';
 		}
 
-		numClues = countClues();
+		setupBoardFromValues(values);
 	}
 
 	/**
@@ -172,21 +202,31 @@ public class Board implements ISudokuBoard, Serializable {
 	 * the board.
 	 */
 	public Board(int[] values) {
-		if (values.length != NUM_CELLS) {
-			throw new IllegalArgumentException("Number of values was not appropriate.");
-		}
-		board = new int[NUM_CELLS];
+		setupBoardFromValues(values);
+	}
 
+	private void setupBoardFromValues(int[] values) {
+		if (values.length != NUM_CELLS) {
+			throw new IllegalArgumentException(
+				String.format("Number of values must be %d, is %d", NUM_CELLS, values.length)
+			);
+		}
+
+		usedDigitsByRow = new int[9];
+		filledCellsByRow = new int[9];
+		usedDigitsByRegion = new int[9];
+		filledCellsByRegion = new int[9];
+		usedDigitsByCol = new int[9];
+		filledCellsByCol = new int[9];
+		this.values = new int[NUM_CELLS];
 		for (int i = 0; i < NUM_CELLS; i++) {
-			int v = values[i];
-			if (v > 0 && v <= 9) {
-				board[i] = (1 << (v - 1));
+			int digit = values[i];
+			if (digit > 0) {
+				setDigitAt(i, digit);
 			} else {
-				board[i] = ALL;
+				this.values[i] = ALL;
 			}
 		}
-
-		numClues = countClues();
 	}
 
 	/**
@@ -194,16 +234,42 @@ public class Board implements ISudokuBoard, Serializable {
 	 * @param other - Board object to copy values from.
 	 */
 	public Board(Board other) {
-		board = new int[NUM_CELLS];
-		System.arraycopy(other.board, 0, board, 0, NUM_CELLS);
+		values = new int[NUM_CELLS];
+		usedDigitsByRow = new int[9];
+		filledCellsByRow = new int[9];
+		usedDigitsByRegion = new int[9];
+		filledCellsByRegion = new int[9];
+		usedDigitsByCol = new int[9];
+		filledCellsByCol = new int[9];
+		System.arraycopy(other.values, 0, values, 0, NUM_CELLS);
+		System.arraycopy(other.usedDigitsByRow, 0, usedDigitsByRow, 0, 9);
+		System.arraycopy(other.filledCellsByRow, 0, filledCellsByRow, 0, 9);
+		System.arraycopy(other.usedDigitsByRegion, 0, usedDigitsByRegion, 0, 9);
+		System.arraycopy(other.filledCellsByRegion, 0, filledCellsByRegion, 0, 9);
+		System.arraycopy(other.usedDigitsByCol, 0, usedDigitsByCol, 0, 9);
+		System.arraycopy(other.filledCellsByCol, 0, filledCellsByCol, 0, 9);
 		numClues = other.numClues;
 	}
 
 	/** Clears all values on the board.*/
 	public void clear() {
-		board = new int[NUM_CELLS];
-		Arrays.fill(board, ALL);
+		values = new int[NUM_CELLS];
+		Arrays.fill(values, ALL);
+		usedDigitsByRow = new int[9];
+		usedDigitsByRegion = new int[9];
+		usedDigitsByCol = new int[9];
+		filledCellsByRow = new int[9];
+		filledCellsByRegion = new int[9];
+		filledCellsByCol = new int[9];
 		numClues = 0;
+	}
+
+	public int getUsedDigitsInRow(int row) {
+		return usedDigitsByRow[row];
+	}
+
+	public int getFilledCellsInRow(int row) {
+		return filledCellsByRow[row];
 	}
 
 	public int getNumClues() {
@@ -225,50 +291,79 @@ public class Board implements ISudokuBoard, Serializable {
 		return result;
 	}
 
+	private void addUsedDigit(int index, int digit) {
+		usedDigitsByRow[getRowForIndex(index)] |= encode(digit);
+		usedDigitsByCol[getColForIndex(index)] |= encode(digit);
+		usedDigitsByRegion[getRegionForIndex(index)] |= encode(digit);
+	}
+
+	private void removeUsedDigit(int index, int digit) {
+		usedDigitsByRow[getRowForIndex(index)] &= ~encode(digit);
+		usedDigitsByCol[getColForIndex(index)] &= ~encode(digit);
+		usedDigitsByRegion[getRegionForIndex(index)] &= ~encode(digit);
+	}
+
+	private void addFilledCell(int index) {
+		filledCellsByRow[getRowForIndex(index)] |= 1 << getColForIndex(index);
+		filledCellsByCol[getColForIndex(index)] |= 1 << getRowForIndex(index);
+		filledCellsByRegion[getRegionForIndex(index)] |= 1 << getIndexInRegion(index);
+	}
+
+	private void removeFilledCell(int index) {
+		filledCellsByRow[getRowForIndex(index)] &= ~(1 << getColForIndex(index));
+		filledCellsByCol[getColForIndex(index)] &= ~(1 << getRowForIndex(index));
+		filledCellsByRegion[getRegionForIndex(index)] &= ~(1 << getIndexInRegion(index));
+	}
+
 	@Override
-	public int[] getValues(int[] board) {
+	public int[] getDigits(int[] digits) {
 		for (int i = 0; i < NUM_CELLS; i++) {
-			board[i] = decode(this.board[i]);
+			digits[i] = decode(values[i]);
 		}
-		return board;
+		return digits;
 	}
 
 	/**
 	 * Retrieves the board as an array of masks.
-	 * @param board - The array to populate with the board values.
+	 * @param masks - The array to populate with the board values.
 	 * @return The board populated array, or if the array was too small,
 	 * a newly allocated array with the populated values.
 	 */
-	public int[] getMasks(int[] board) {
-		if (board.length < NUM_CELLS) {
-			board = new int[NUM_CELLS];
+	public int[] getMasks(int[] masks) {
+		if (masks.length < NUM_CELLS) {
+			masks = new int[NUM_CELLS];
 		}
-		System.arraycopy(this.board, 0, board, 0, NUM_CELLS);
-		return board;
+		System.arraycopy(this.values, 0, masks, 0, NUM_CELLS);
+		return masks;
 	}
 
 	@Override
-	public int getValueAt(int index) {
-		return decode(board[index]);
+	public int getDigitAt(int index) {
+		return decode(values[index]);
 	}
 
 	@Override
-	public void setValueAt(int index, int value) {
-		if (value < 0 || value > 9) {
+	public void setDigitAt(int index, int digit) {
+		if (digit < 0 || digit > 9) {
 			throw new IllegalArgumentException("Value is out of bounds.");
 		}
 
-		int prevValue = decode(board[index]);
-		if (value > 0) {
-			board[index] = 1 << (value - 1);
+		int prevValue = decode(values[index]);
+		if (digit > 0) {
+			values[index] = encode(digit);
+			addUsedDigit(index, digit);
+			addFilledCell(index);
 			if (prevValue == 0) {
 				numClues++;
+			} else {
+				removeUsedDigit(index, digit);
 			}
-
 		} else {
-			board[index] = 0;
+			values[index] = ALL;
 			if (prevValue > 0) {
 				numClues--;
+				removeUsedDigit(index, digit);
+				removeFilledCell(index);
 			}
 		}
 	}
@@ -281,7 +376,7 @@ public class Board implements ISudokuBoard, Serializable {
 	 * the top-left position, and 80 the bottom-right.
 	 */
 	public int getMaskAt(int index) {
-		return board[index];
+		return values[index];
 	}
 
 	/**
@@ -290,22 +385,16 @@ public class Board implements ISudokuBoard, Serializable {
 	 * <br/>See {@link Board} for information about how the bitmask is used.
 	 * @param index - The position on the board [0, 80], where 0 represents
 	 * the top-left position, and 80 the bottom-right.
-	 * @param value - The bitmask to set at this position.
+	 * @param mask - The bitmask to set at this position.
 	 */
-	public void setMaskAt(int index, int value) {
-		if (value < 0 || value > ALL) {
-			throw new IllegalArgumentException("Value is out of bounds.");
+	public void setMaskAt(int index, int mask) {
+		if (mask < 0 || mask > ALL) {
+			throw new IllegalArgumentException("Mask value is out of bounds.");
 		}
 
-		int prevValue = decode(board[index]);
-		int newValue = decode(value);
-		if (newValue > 0 && prevValue == 0) {
-			numClues++;
-		} else if (newValue == 0 && prevValue > 0) {
-			numClues--;
-		}
-
-		board[index] = value;
+		int newDigit = decode(mask);
+		setDigitAt(index, newDigit); // updates numClues and other cached data if necessary
+		values[index] = mask;
 	}
 
 	/**
@@ -318,7 +407,7 @@ public class Board implements ISudokuBoard, Serializable {
 		if (this == obj)
 			return true;
 		if (obj instanceof Board) {
-			return Arrays.equals(board, ((Board) obj).board);
+			return Arrays.equals(values, ((Board) obj).values);
 		}
 		return false;
 	}
@@ -326,7 +415,7 @@ public class Board implements ISudokuBoard, Serializable {
 	/** Returns a string representing the Sudoku board in a condensed form.*/
 	public String getSimplifiedString() {
 		StringBuilder strb = new StringBuilder();
-		for (int i : board) {
+		for (int i : values) {
 			int v = decode(i);
 			if (v > 0) {
 				strb.append(v);
@@ -342,8 +431,8 @@ public class Board implements ISudokuBoard, Serializable {
 		StringBuilder strb = new StringBuilder("  ");
 
 	    for (int i = 0; i < NUM_CELLS; i++) {
-	    	if (isSingleDigit(board[i])) {
-	    		strb.append(decode(board[i]));
+	    	if (isSingleDigit(values[i])) {
+	    		strb.append(decode(values[i]));
 	    	} else {
 	    		strb.append('.');
 	    	}
@@ -377,18 +466,19 @@ public class Board implements ISudokuBoard, Serializable {
 
 	@Override
 	public int hashCode() {
-		return Arrays.hashCode(board);
+		return Arrays.hashCode(values);
 	}
 
+	// Converts candidates bitstring held in this.values[index] to a list of candidate digits.
 	@Override
 	public List<Integer> getCandidates(int index, List<Integer> list) {
-		int value = board[index];
-		int decoded = decode(value);
-		if (decoded > 0) {
-			list.add(decoded);
+		int mask = values[index];
+		int digit = decode(mask);
+		if (digit > 0) {
+			list.add(digit);
 		} else {
 			for (int shift = 0; shift < 9; shift++) {
-				if ((value & (1 << shift)) > 0) {
+				if ((mask & (1 << shift)) > 0) {
 					list.add(shift + 1);
 				}
 			}
@@ -398,7 +488,7 @@ public class Board implements ISudokuBoard, Serializable {
 
 	@Override
 	public Iterator<Integer> iterator() {
-		return Arrays.stream(board).iterator();
+		return Arrays.stream(values).iterator();
 	}
 
 	/**
@@ -461,11 +551,11 @@ public class Board implements ISudokuBoard, Serializable {
 
 	public static int[] getRegionIndices(int region) {
 		int[] result = new int[NUM_DIGITS];
-		int gr = region / NUM_ROWS_IN_REGION;
-		int gc = region % NUM_COLS_IN_REGION;
+		int gr = region / NUM_REGION_ROWS;
+		int gc = region % NUM_REGION_COLS;
 		for (int i = 0; i < NUM_DIGITS; i++) {
-			result[i] = gr*NUM_DIGITS*NUM_ROWS_IN_REGION + gc*NUM_COLS_IN_REGION +
-				(i/NUM_ROWS_IN_REGION)*NUM_DIGITS + (i%NUM_COLS_IN_REGION);
+			result[i] = gr*NUM_DIGITS*NUM_REGION_ROWS + gc*NUM_REGION_COLS +
+				(i/NUM_REGION_ROWS)*NUM_DIGITS + (i%NUM_REGION_COLS);
 		}
 		return result;
 	}
@@ -479,27 +569,11 @@ public class Board implements ISudokuBoard, Serializable {
 	 * @return True if the row is valid; otherwise false.
 	 */
 	public boolean isRowValid(int row) {
-		int c = 0;
-		for (int i : ROW_INDICES[row]) {
-			int digit = getValueAt(i);
-			if (digit > 0 && digit <= 9) {
-				int mask = 1 << (digit - 1);
-				if ((c & mask) != 0) {
-					return false;
-				}
-				c |= mask;
-			}
-		}
-		return true;
+		return Integer.bitCount(usedDigitsByRow[row]) == Integer.bitCount(filledCellsByRow[row]);
 	}
 
 	public boolean isRowFull(int row) {
-		for (int i = row * 9, nextRow = (row + 1) * 9; i < nextRow; i++) {
-			if (getValueAt(i) == 0) {
-				return false;
-			}
-		}
-		return true;
+		return filledCellsByRow[row] == ALL;
 	}
 
 	/**
@@ -507,31 +581,15 @@ public class Board implements ISudokuBoard, Serializable {
 	 * <br/>A column is considered valid if it contains no duplicate digits
 	 * in any of the cells.
 	 * <br/>The column does not need to be complete to be valid.
-	 * @param column - the column of the board to evaluate.
+	 * @param col - the column of the board to evaluate.
 	 * @return True if the column is valid; otherwise false.
 	 */
-	public boolean isColValid(int column) {
-		int c = 0;
-		for (int i : COL_INDICES[column]) {
-			int digit = getValueAt(i);
-			if (digit > 0 && digit <= 9) {
-				int mask = 1 << (digit - 1);
-				if ((c & mask) != 0) {
-					return false;
-				}
-				c |= mask;
-			}
-		}
-		return true;
+	public boolean isColValid(int col) {
+		return Integer.bitCount(usedDigitsByCol[col]) == Integer.bitCount(filledCellsByCol[col]);
 	}
 
-	public boolean isColFull(int column) {
-		for (int i : COL_INDICES[column]) {
-			if (getValueAt(i) == 0) {
-				return false;
-			}
-		}
-		return true;
+	public boolean isColFull(int col) {
+		return filledCellsByCol[col] == ALL;
 	}
 
 	/**
@@ -543,27 +601,11 @@ public class Board implements ISudokuBoard, Serializable {
 	 * @return True if the region is valid; otherwise false.
 	 */
 	public boolean isRegionValid(int region) {
-		int c = 0;
-		for (int i : REGION_INDICES[region]) {
-			int digit = getValueAt(i);
-			if (digit > 0 && digit <= 9) {
-				int mask = 1 << (digit - 1);
-				if ((c & mask) != 0) {
-					return false;
-				}
-				c |= mask;
-			}
-		}
-		return true;
+		return Integer.bitCount(usedDigitsByRegion[region]) == Integer.bitCount(filledCellsByRegion[region]);
 	}
 
 	public boolean isRegionFull(int region) {
-		for (int i : REGION_INDICES[region]) {
-			if (getValueAt(i) == 0) {
-				return false;
-			}
-		}
-		return true;
+		return filledCellsByRegion[region] == ALL;
 	}
 
 	/**
@@ -575,12 +617,6 @@ public class Board implements ISudokuBoard, Serializable {
 	 */
 	public boolean isFull() {
 		return numClues == NUM_CELLS;
-		//for (int b : board) {
-		//	if (DECODER2[b] == 0) {
-		//		return false;
-		//	}
-		//}
-		//return true;
 	}
 
 	/**
@@ -589,11 +625,11 @@ public class Board implements ISudokuBoard, Serializable {
 	 * valid.
 	 * @return True if the board is solved; otherwise false.
 	 */
-	public boolean isSolved() {
+	public boolean isComplete() {
 		return isFull() && isValid();
 	}
 
 	public void kill() {
-		this.board = null;
+		this.values = null;
 	}
 }

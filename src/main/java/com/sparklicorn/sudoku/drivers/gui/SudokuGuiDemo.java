@@ -68,7 +68,7 @@ public class SudokuGuiDemo {
 			}
 
 			for (int i = 0; i < Board.NUM_CELLS; i++) {
-				panel.cells[i].digit = solution.getValueAt(i);
+				panel.cells[i].digit = solution.getDigitAt(i);
 			}
 			panel.repaint();
 		});

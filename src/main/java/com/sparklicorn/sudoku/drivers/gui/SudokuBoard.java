@@ -243,7 +243,7 @@ public class SudokuBoard extends JPanel implements ComponentListener {
 
 		this.setLayout(null);
 		for (int i = 0; i < NUM_CELLS; i++) {
-			cells[i] = new SudokuCell(board.getValueAt(i));
+			cells[i] = new SudokuCell(board.getDigitAt(i));
 			add(cells[i]);
 		}
 

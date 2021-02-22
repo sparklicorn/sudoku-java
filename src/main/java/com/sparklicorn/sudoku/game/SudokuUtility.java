@@ -8,7 +8,7 @@ public class SudokuUtility {
      * Yes, I just made that up.
      */
     public static Board normalize(Board board) {
-        return new Board(normalize(board.getValues(new int[Board.NUM_CELLS])));
+        return new Board(normalize(board.getDigits(new int[Board.NUM_CELLS])));
     }
 
     /**
