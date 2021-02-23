@@ -2,85 +2,13 @@ package com.sparklicorn.sudoku.game;
 
 import static org.junit.Assert.*;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 import org.junit.*;
 
-import com.google.gson.Gson;
-
 public class TestBoard {
 
-	private static class BoardFixture {
-        static final String INVALID_SOLUTION = "NO SOLUTION";
-
-        String boardString;
-        String solutionString;
-
-        int numClues;
-        boolean isFull;
-        boolean isValid;
-        boolean isComplete;
-
-        List<Integer> validRows;
-        List<Integer> validCols;
-        List<Integer> validRegions;
-        List<Integer> fullRows;
-        List<Integer> fullCols;
-        List<Integer> fullRegions;
-
-        transient Board board;
-
-        static List<BoardFixture> loadFromFile(String filename) throws IOException {
-            List<BoardFixture> fixtures = new ArrayList<>();
-
-            Scanner scanner = new Scanner(TestBoard.class.getResourceAsStream(filename));
-            Gson gson = new Gson();
-            while (scanner.hasNextLine()) {
-                BoardFixture fixture = gson.fromJson(scanner.nextLine(), BoardFixture.class);
-                fixture.getBoard();
-                fixtures.add(fixture);
-            }
-			scanner.close();
-
-            return fixtures;
-        }
-
-        Board getBoard() {
-            if (this.board == null) {
-                this.board = new Board(this.boardString);
-            }
-            return this.board;
-        }
-
-        String getRowAsString(int row) {
-            StringBuilder strb = new StringBuilder();
-			for (int i : Board.getRowIndices(row)) {
-				strb.append(board.getDigitAt(i));
-			}
-            return strb.toString();
-        }
-
-        String getColumnAsString(int col) {
-            StringBuilder strb = new StringBuilder();
-            for (int i : Board.getColIndices(col)) {
-                strb.append(board.getDigitAt(i));
-            }
-            return strb.toString();
-        }
-
-        String getRegionAsString(int region) {
-			StringBuilder strb = new StringBuilder();
-            for (int i : Board.getRegionIndices(region)) {
-                strb.append(board.getDigitAt(i));
-            }
-            return strb.toString();
-        }
-    }
-
-    private static List<BoardFixture> boardFixtures;
+	private static List<BoardFixture> boardFixtures;
     private static final String boardFixturesFileName = "sudoku-board-fixtures.txt";
 
     @BeforeClass
