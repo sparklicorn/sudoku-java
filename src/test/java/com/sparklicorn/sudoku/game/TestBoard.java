@@ -10,6 +10,22 @@ import com.sparklicorn.sudoku.puzzles.GeneratedPuzzles;
 
 public class TestBoard {
 
+	@Test
+	public void testGetCompressedString() {
+		assertEquals("-", new Board().getCompressedString());
+
+		assertEquals(
+			"59a1b218e5c6.4.97f3.48.29.6b5.7a8e32a93.14f2.7a8",
+			new Board("59..1...218......5....6.4.97.......3.48.29.6...5.7..8......32..93.14.......2.7..8").getCompressedString()
+		);
+
+		assertEquals(
+			"Zr2g",
+			new Board("........................................................................2........").getCompressedString()
+		);
+	}
+
+
 	private static final String[] VALID_CONFIGS = new String[] {
 		"793458261218963754456271893634712589185649327927385146541836972872194635369527418",
 		"523419687916837245478562391234678159681945732795321864352796418169284573847153926",

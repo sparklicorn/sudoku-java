@@ -8,15 +8,35 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+
 import java.net.HttpURLConnection;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.function.Function;
 
 /**
  * Provides utility methods for working with files, HTTP connections.
  */
 public class FileUtil {
+
+	public static void transformLinesInFile(String fromPath, String toPath, Function<String, String> func, boolean skipEmptyLines) {
+        try (
+            Scanner scanner = new Scanner(new File(fromPath));
+            PrintWriter pw = new PrintWriter(toPath);
+        ) {
+			while(scanner.hasNextLine()) {
+				String line = scanner.nextLine();
+				if (line.trim().isEmpty() && skipEmptyLines) {
+					continue;
+				}
+				pw.println(func.apply(line));
+			}
+        } catch (IOException ex) {
+			ex.printStackTrace();
+		}
+    }
 
 	/**
 	 * Returns a List containing the absolute paths of files found matching

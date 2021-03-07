@@ -82,7 +82,15 @@ public class Board implements ISudokuBoard, Serializable {
 	}
 
 	public static int getRegionForIndex(int i) {
-		return i / 9 + (i % 9);
+		int r = i / 9;
+		int c = i % 9;
+		return (r / 3) * 3 + c/3;
+	}
+
+	public static int getIndexInRegion(int i) {
+		int r = i / 9;
+		int c = i % 9;
+		return (r % 3) * 3 + (c % 3);
 	}
 
 	/**
@@ -336,6 +344,24 @@ public class Board implements ISudokuBoard, Serializable {
 		}
 		return strb.toString();
 	}
+
+	public static final String alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	public String getCompressedString() {
+		if (getNumEmptySpaces() == NUM_CELLS) {
+			return "-";
+		}
+
+		String str = getSimplifiedString();
+		for (int numEmpty = alphabet.length() + 1; numEmpty > 1; numEmpty--) {
+			str = str.replaceAll(
+				"\\.".repeat(numEmpty),
+				Character.toString(alphabet.charAt(numEmpty - 2))
+			);
+		}
+		return str;
+	}
+
+	// TODO - Build Board from compressed string
 
 	@Override
 	public String toString() {

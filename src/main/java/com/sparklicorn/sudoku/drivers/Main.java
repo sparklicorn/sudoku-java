@@ -44,7 +44,7 @@ public class Main {
 
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         // default command
-        String command = "play";
+        String command = "configs";
 
         if (args != null) {
             if (args.length >= 1) {
@@ -70,13 +70,12 @@ public class Main {
                 }
                 break;
             case "puzzles":
-                if (args.length >= 3) {
-                    GeneratePuzzles.main(new String[] { args[1], args[2] });
-                } else if (args.length >= 2) {
-                    GeneratePuzzles.main(new String[] { args[1] });
-                } else {
-                    GeneratePuzzles.main(null);
+                String[] _args = null;
+                if (args.length > 1) {
+                    _args = new String[args.length - 1];
+                    System.arraycopy(args, 1, _args, 0, _args.length);
                 }
+                GeneratePuzzles.main(_args);
                 break;
             case "solve":
                 if (args.length >= 2) {

@@ -296,17 +296,16 @@ public class Generator {
 		}
     }
 
-    public static Board generateConfig() {
+    public static Set<Board> generateConfigs() {
 		//Start with a blank board and generate some of the regions.
-		Board b = new Board();
+		Set<Board> configs = null;
 
-		int mask = 0b101010001;
-		boolean hasSolutions = false;
-		while (!hasSolutions) {
+		while (configs == null || configs.isEmpty()) {
+            Board b = new Board();
 
             do {
                 b.clear();
-                Generator.fillSections(b, mask);
+                Generator.fillSections(b, 0b101010001);
             } while (!b.isValid());
 
             //System.out.println("Trying partial config: ");
@@ -314,19 +313,18 @@ public class Generator {
             //System.out.println("Trying partial config: " + b.getSimplifiedString());
 
 			//Attempt to solve the partially-filled board.
-			Set<Board> set = Solver.getAllSolutions(b);
+			configs = Solver.getAllSolutions(b);
 
             //System.out.println("Found " + set.size() + " solutions.");
-
-			if (hasSolutions = (set.size() > 0)) {
-                ArrayList<Board> configs = new ArrayList<>(set);
-				//Return a randomly selected configuration from the solution set.
-				b = configs.get(ThreadLocalRandom.current().nextInt(configs.size()));
-			}
 		}
 
         //System.out.println("Generated config -> " + b.getSimplifiedString());
-		return b;
+		return configs;
     }
 
+    public static Board generateConfig() {
+        Set<Board> configSet = generateConfigs();
+        int size = configSet.size();
+        return configSet.toArray(new Board[size])[ThreadLocalRandom.current().nextInt(size)];
+    }
 }
